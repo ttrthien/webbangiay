@@ -7,6 +7,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Products")
 public class Product {
@@ -29,10 +31,21 @@ public class Product {
 
     private Boolean available;
 
+    @Column(columnDefinition = "nvarchar(MAX)")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "Categoryid")
     private Category category;
 
     @OneToMany(mappedBy = "product")
     private List<OrderDetail> orderDetails;
+
+    @ManyToMany
+    @JoinTable(
+        name = "product_sizes", 
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "size_id")
+    )
+    private List<Size> sizes;
 }

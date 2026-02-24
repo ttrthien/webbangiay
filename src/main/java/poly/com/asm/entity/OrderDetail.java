@@ -13,6 +13,8 @@ public class OrderDetail {
 
     private Double price;
     private Integer quantity;
+    
+    private Integer size; 
 
     @ManyToOne
     @JoinColumn(name = "Orderid")
@@ -21,5 +23,4 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "Productid")
     private Product product;
-    
 }

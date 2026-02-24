@@ -1,28 +1,99 @@
-<div class="card">
-    <div class="card-header fw-bold">CHI TIẾT SẢN PHẨM</div>
-    <div class="card-body">
+<div class="card shadow-sm border-0">
+    <div class="card-header fw-bold bg-dark text-white py-3">
+        <i class="bi bi-info-circle me-2"></i>CHI TIẾT SẢN PHẨM
+    </div>
+    <div class="card-body p-4">
         <div class="row" th:object="${item}">
-            <div class="col-md-5 text-center">
-                <img th:src="@{|/images/*{image}|}" class="img-fluid rounded border" alt="Product Image">
+            <div class="col-md-5 text-center mb-4 mb-md-0">
+                <img th:src="@{|/images/*{image}|}" class="img-fluid rounded shadow-sm border" 
+                     alt="Product Image" style="max-height: 400px; object-fit: contain;">
             </div>
+            
             <div class="col-md-7">
-                <h3 class="text-primary">[[*{name}]]</h3>
-                <h4 class="text-danger fw-bold mt-3">[[${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}]] VNĐ</h4>
+                <h2 class="text-primary fw-bold" th:text="*{name}">Tên sản phẩm</h2>
+                <h4 class="text-danger fw-bold mt-3">
+                    [[${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}]] <small>VNĐ</small>
+                </h4>
                 
-                <div class="my-3">
-                    <strong>Ngày đăng:</strong> [[*{createDate}]] <br>
-                    <strong>Loại hàng:</strong> [[*{category.name}]]
+                <div class="my-3 p-3 bg-light rounded">
+                    <div class="mb-1"><strong>Ngày đăng:</strong> <span th:text="*{createDate}"></span></div>
+                    <div><strong>Loại hàng:</strong> <span th:text="*{category.name}" class="badge bg-info text-dark"></span></div>
                 </div>
                 
-                <hr>
+                <hr class="my-4">
+
+                <form th:action="@{|/cart/add/*{id}|}" method="post" id="orderForm">
+                    <div class="mb-4">
+                        <label class="fw-bold mb-3 d-block"><i class="bi bi-rulers me-2"></i>Chọn Size giày:</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <div th:each="s : *{sizes}">
+                                <input type="radio" class="btn-check" name="size" 
+                                       th:id="${'size' + s.sizeValue}" 
+                                       th:value="${s.sizeValue}">
+                                <label class="btn btn-outline-primary px-4 py-2" 
+                                       th:for="${'size' + s.sizeValue}" 
+                                       th:text="${s.sizeValue}"></label>
+                            </div>
+                        </div>
+                        <div id="size-error-msg" class="text-danger small mt-2 fw-bold" style="display:none;">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Vui lòng chọn một kích cỡ trước khi thêm vào giỏ hàng!
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex mt-4">
+                        <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">
+                            <i class="bi bi-cart-plus me-2"></i>ĐẶT MUA NGAY
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-lg px-3 shadow-sm">
+                            <i class="bi bi-heart-fill"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
                 
-                <div class="d-flex gap-2">
-                    <a th:href="@{|/cart/add/*{id}|}" class="btn btn-success btn-lg">
-                        <i class="bi bi-cart-check"></i> ĐẶT MUA NGAY
-                    </a>
-                    <button class="btn btn-outline-secondary btn-lg"><i class="bi bi-heart"></i></button>
+                <div class="mt-3">
+                    <h5 class="fw-bold text-secondary"><i class="bi bi-card-text me-2"></i>Mô tả sản phẩm</h5>
+                    <p class="text-muted lh-base" style="white-space: pre-line; text-align: justify;" 
+                       th:text="*{description} ?: 'Hiện tại sản phẩm này chưa có mô tả chi tiết. Vui lòng quay lại sau.'"></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('orderForm').onsubmit = function(e) {
+        let sizeChecked = document.querySelector('input[name="size"]:checked');
+        let errorMsg = document.getElementById('size-error-msg');
+        
+        if (!sizeChecked) {
+            e.preventDefault(); 
+            errorMsg.style.display = 'block'; 
+            
+            this.classList.add('shake-animation');
+            setTimeout(() => this.classList.remove('shake-animation'), 500);
+            
+            return false;
+        }
+        errorMsg.style.display = 'none';
+    };
+</script>
+
+<style>
+    /* Hiệu ứng rung khi quên chọn size */
+    .shake-animation {
+        animation: shake 0.5s;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    /* Hiệu ứng khi hover chọn size */
+    .btn-check:checked + .btn-outline-primary {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+</style>

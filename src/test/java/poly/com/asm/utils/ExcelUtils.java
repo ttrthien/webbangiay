@@ -33,8 +33,8 @@ public class ExcelUtils {
         sheet = workbook.getSheetAt(0);
         Row row = sheet.getRow(rowNum);
         
-        row.createCell(4).setCellValue(result); // Cột Actual Result
-        row.createCell(5).setCellValue(status); // Cột Status
+        row.createCell(4).setCellValue(result); 
+        row.createCell(5).setCellValue(status); 
         
         FileOutputStream fileOut = new FileOutputStream(filePath);
         workbook.write(fileOut);

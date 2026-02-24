@@ -13,4 +13,6 @@ public class CartItem {
     double price;
     int qty = 1; 
     String image;
+    
+    Integer size; 
 }

@@ -16,33 +16,31 @@ public class ExcelUtilsSearch {
         workbook = new XSSFWorkbook(excelFile);
         sheet = workbook.getSheet(sheetName);
         
-        int totalRows = sheet.getLastRowNum(); // Sử dụng LastRowNum để chính xác hơn
+        int totalRows = sheet.getLastRowNum(); 
         List<Object[]> dataList = new ArrayList<>();
 
         for (int i = 1; i <= totalRows; i++) {
             Row row = sheet.getRow(i);
-            // Kiểm tra: Nếu dòng rỗng hoặc ô STT (cột 0) rỗng thì bỏ qua
             if (row == null || getCellValue(row.getCell(0)).isEmpty()) {
                 continue;
             }
             
             Object[] rowData = new Object[5];
-            rowData[0] = getCellValue(row.getCell(1)); // Keyword
-            rowData[1] = getCellValue(row.getCell(2)); // Category
-            rowData[2] = getCellValue(row.getCell(3)); // PriceRange
-            rowData[3] = getCellValue(row.getCell(4)); // Expected
-            rowData[4] = i; // Row Index để ghi kết quả
+            rowData[0] = getCellValue(row.getCell(1)); 
+            rowData[1] = getCellValue(row.getCell(2)); 
+            rowData[2] = getCellValue(row.getCell(3)); 
+            rowData[3] = getCellValue(row.getCell(4)); 
+            rowData[4] = i; 
             dataList.add(rowData);
         }
         workbook.close();
         
-        // Chuyển List sang Object[][] để DataProvider sử dụng
         return dataList.toArray(new Object[0][0]);
     }
 
     private static String getCellValue(Cell cell) {
         if (cell == null) return "";
-        cell.setCellType(CellType.STRING); // Ép kiểu về String để tránh lỗi định dạng
+        cell.setCellType(CellType.STRING); 
         return cell.getStringCellValue().trim();
     }
 

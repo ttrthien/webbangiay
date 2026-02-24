@@ -42,7 +42,7 @@ public class OrderController {
         order.setCreateDate(new Date());
         order.setAddress(address);
         order.setPaymentMethod(paymentMethod);
-        order.setStatus(0);
+        order.setStatus(0); // 0: Chờ thanh toán
 
         List<OrderDetail> details = new ArrayList<>();
         for (CartItem item : cartService.getItems()) {
@@ -51,6 +51,9 @@ public class OrderController {
             detail.setProduct(productService.findById(item.getId()));
             detail.setPrice(item.getPrice());
             detail.setQuantity(item.getQty());
+            
+            detail.setSize(item.getSize()); 
+            
             details.add(detail);
         }
         order.setOrderDetails(details);
@@ -60,12 +63,13 @@ public class OrderController {
             cartService.clear();
             return "redirect:/order/list";
         } else {
+            // Thanh toán VNPAY
             Order savedOrder = orderService.create(order);
             
             String ipAddress = Config.getIpAddress(request);
-            
             String orderInfo = "Thanh toan don hang " + savedOrder.getId();
             
+            // Sử dụng Config mới với TmnCode: 4YUP19I4
             String vnpayUrl = vnpayService.createPaymentUrl((long) cartService.getAmount(), orderInfo, ipAddress);
             session.setAttribute("pendingOrderId", savedOrder.getId());
             
@@ -78,9 +82,10 @@ public class OrderController {
         String responseCode = request.getParameter("vnp_ResponseCode");
         Long orderId = (Long) session.getAttribute("pendingOrderId");
         
+        // vnp_ResponseCode = "00" là thành công
         if ("00".equals(responseCode) && orderId != null) {
             Order order = orderService.findById(orderId);
-            order.setStatus(1); 
+            order.setStatus(1); // 1: Đã thanh toán
             orderService.update(order);
             cartService.clear();
             session.removeAttribute("pendingOrderId");

@@ -12,7 +12,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Sản phẩm</th>
-                    <th>Giá</th>
+                    <th class="text-center">Size</th> <th>Giá</th>
                     <th style="width: 120px;">Số lượng</th>
                     <th>Thành tiền</th>
                     <th></th>
@@ -26,22 +26,28 @@
                             <span class="fw-bold">[[${item.name}]]</span>
                         </div>
                     </td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary">[[${item.size}]]</span>
+                    </td>
                     <td>[[${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}]]</td>
                     <td>
                         <form action="/cart/update" method="post" class="d-flex">
                             <input type="hidden" name="id" th:value="${item.id}">
+                            <input type="hidden" name="size" th:value="${item.size}"> 
                             <input type="number" name="qty" th:value="${item.qty}" min="1" onchange="this.form.submit()" class="form-control form-control-sm text-center">
                         </form>
                     </td>
                     <td class="text-danger fw-bold">[[${#numbers.formatDecimal(item.price * item.qty, 0, 'COMMA', 0, 'POINT')}]]</td>
                     <td>
-                        <a th:href="@{|/cart/remove/${item.id}|}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        <a th:href="@{|/cart/remove/${item.id}?size=${item.size}|}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
                     </td>
                 </tr>
             </tbody>
             <tfoot class="fw-bold">
                 <tr>
-                    <td colspan="3" class="text-end text-uppercase">Tổng cộng:</td>
+                    <td colspan="4" class="text-end text-uppercase">Tổng cộng:</td>
                     <td colspan="2" class="text-danger fs-5">[[${#numbers.formatDecimal(session.cart.amount, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
                 </tr>
             </tfoot>

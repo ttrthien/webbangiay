@@ -4,17 +4,17 @@ import java.util.Collection;
 import poly.com.asm.model.CartItem;
 
 public interface CartService {
-	void add(Integer id);
+    void add(Integer id, Integer size); 
 
-	void remove(Integer id);
+    void remove(Integer id, Integer size); 
 
-	void update(Integer id, int qty);
+    void update(Integer id, Integer size, int qty); 
 
-	void clear();
+    void clear();
 
-	Collection<CartItem> getItems();
+    Collection<CartItem> getItems();
 
-	int getCount();
+    int getCount();
 
-	double getAmount();
+    double getAmount();
 }
