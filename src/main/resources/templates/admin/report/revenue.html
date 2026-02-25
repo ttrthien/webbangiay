@@ -1,19 +1,36 @@
-<div class="card shadow-sm">
-    <div class="card-header bg-success text-white fw-bold">DOANH THU THEO LOẠI HÀNG</div>
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Loại sản phẩm</th> <th>Tổng doanh thu</th> <th>Tổng số lượng bán</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${items}">
-                    <td th:text="${item.group}"></td>
-                    <td class="fw-bold text-danger">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                    <td th:text="${item.count}"></td>
-                </tr>
-            </tbody>
-        </table>
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-success text-white fw-bold py-3 text-uppercase">
+        <i class="bi bi-bar-chart-fill me-2"></i> THỐNG KÊ DOANH THU THEO LOẠI HÀNG
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-start ps-4">Loại sản phẩm</th> 
+                        <th>Tổng doanh thu</th> 
+                        <th>Tổng số lượng</th>
+                        <th>Giá cao nhất</th>
+                        <th>Giá thấp nhất</th>
+                        <th>Giá trung bình</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${items}">
+                        <td class="text-start ps-4 fw-bold" th:text="${item.group}"></td>
+                        
+                        <td class="fw-bold text-danger">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                        
+                        <td th:text="${item.count}"></td>
+                        
+                        <td class="fw-bold text-success">[[${#numbers.formatDecimal(item.max, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                        
+                        <td class="fw-bold text-warning">[[${#numbers.formatDecimal(item.min, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                        
+                        <td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.avg, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
