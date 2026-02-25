@@ -1,6 +1,7 @@
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-warning text-dark fw-bold py-2">
-        <i class="bi bi-cart-check-fill me-1"></i> QUẢN LÝ ĐƠN HÀNG
+    <div class="card-header bg-warning text-dark fw-bold py-2 d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-cart-check-fill me-1"></i> QUẢN LÝ ĐƠN HÀNG</span>
+        <span class="badge bg-dark" th:text="${orders.size() + ' đơn hàng'}"></span>
     </div>
     <div class="card-body">
         <div th:if="${message}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
@@ -15,7 +16,9 @@
                         <th style="width: 70px;">ID</th>
                         <th>Khách hàng & Địa chỉ</th>
                         <th style="width: 130px;">Ngày đặt</th>
-                        <th style="width: 140px;">Trạng thái</th> <th style="width: 260px;">Xử lý nhanh</th>
+                        <th style="width: 140px;">Trạng thái</th> 
+                        <th style="width: 200px;">Cập nhật nhanh</th>
+                        <th style="width: 100px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -23,35 +26,50 @@
                         <td class="text-center fw-bold text-primary">#[[${o.id}]]</td>
                         <td>
                             <div class="fw-bold text-uppercase" style="font-size: 0.85rem;">[[${o.account.username}]]</div>
-                            <small class="text-muted"><i class="bi bi-geo-alt"></i> [[${o.address}]]</small>
+                            <small class="text-muted d-block text-truncate" style="max-width: 300px;">
+                                <i class="bi bi-geo-alt"></i> [[${o.address}]]
+                            </small>
                         </td>
                         <td class="text-center small">[[${#dates.format(o.createDate, 'dd-MM-yyyy')}]]</td>
                         
                         <td class="text-center">
                             <div th:switch="${o.status}">
-                                <span th:case="0" class="badge bg-secondary px-3">Mới</span>
-                                <span th:case="1" class="badge bg-primary px-3">Xác nhận</span>
-                                <span th:case="2" class="badge bg-info text-dark px-3">Đang giao</span>
-                                <span th:case="3" class="badge bg-success px-3">Hoàn tất</span>
-                                <span th:case="*" class="badge bg-secondary px-3">Mới</span>
+                                <span th:case="0" class="badge bg-secondary px-2">Chờ xử lý</span>
+                                <span th:case="1" class="badge bg-primary px-2">Xác nhận</span>
+                                <span th:case="2" class="badge bg-info text-dark px-2">Đang giao</span>
+                                <span th:case="3" class="badge bg-success px-2">Hoàn tất</span>
+                                <span th:case="4" class="badge bg-danger px-2">Đã hủy</span>
+                                <span th:case="*" class="badge bg-secondary px-2">Mới</span>
                             </div>
                         </td>
 
                         <td class="text-center">
-                            <form th:action="@{/admin/order/update-status}" method="post" class="d-flex gap-2 justify-content-center">
+                            <form th:action="@{/admin/order/update-status}" method="post" class="d-flex gap-1 justify-content-center">
                                 <input type="hidden" name="id" th:value="${o.id}">
-                                
-                                <select name="status" class="form-select form-select-sm border-dark shadow-sm">
+                                <select name="status" class="form-select form-select-sm border-dark shadow-sm" style="font-size: 0.75rem;">
                                     <option value="0" th:selected="${o.status == 0}">Mới</option>
                                     <option value="1" th:selected="${o.status == 1}">Xác nhận</option>
                                     <option value="2" th:selected="${o.status == 2}">Đang giao</option>
                                     <option value="3" th:selected="${o.status == 3}">Hoàn tất</option>
+                                    <option value="4" th:selected="${o.status == 4}">Hủy đơn</option>
                                 </select>
-                                
-                                <button type="submit" class="btn btn-sm btn-dark px-3 fw-bold">
-                                    <i class="bi bi-save me-1"></i> LƯU
+                                <button type="submit" class="btn btn-sm btn-dark">
+                                    <i class="bi bi-check2"></i>
                                 </button>
                             </form>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a th:href="@{|/admin/order/detail/${o.id}|}" class="btn btn-sm btn-outline-info border-0" title="Chi tiết">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a th:href="@{|/admin/order/delete/${o.id}|}" 
+                                   class="btn btn-sm btn-outline-danger border-0" 
+                                   onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn đơn hàng này và các chi tiết liên quan?')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

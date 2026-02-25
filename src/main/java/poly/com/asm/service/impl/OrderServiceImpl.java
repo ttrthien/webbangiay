@@ -9,7 +9,6 @@ import poly.com.asm.dao.OrderDAO;
 import poly.com.asm.dao.OrderDetailDAO;
 import poly.com.asm.entity.Account;
 import poly.com.asm.entity.Order;
-import poly.com.asm.entity.OrderDetail;
 import poly.com.asm.service.OrderService;
 
 @Service
@@ -42,5 +41,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findAll() {
         return odao.findAll();
+    }
+    
+    @Transactional 
+    @Override
+    public void delete(Long id) {
+        odao.deleteById(id);
     }
 }

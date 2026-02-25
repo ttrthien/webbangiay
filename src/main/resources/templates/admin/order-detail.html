@@ -1,0 +1,60 @@
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-info text-white fw-bold py-2">
+        <i class="bi bi-info-circle-fill me-1"></i> CHI TIẾT ĐƠN HÀNG #[[${order.id}]]
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <p class="mb-1"><strong>Khách hàng:</strong> [[${order.account.fullname}]] (@[[${order.account.username}]])</p>
+                <p class="mb-1"><strong>Ngày đặt:</strong> [[${#dates.format(order.createDate, 'dd-MM-yyyy HH:mm')}]]</p>
+            </div>
+            <div class="col-sm-6 text-md-end">
+                <p class="mb-1"><strong>Địa chỉ giao hàng:</strong> [[${order.address}]]</p>
+                <p class="mb-1"><strong>Phương thức:</strong> <span class="badge bg-light text-dark border">[[${order.paymentMethod}]]</span></p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light text-center small">
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="detail, state : ${order.orderDetails}">
+                        <td class="text-center" th:text="${state.index + 1}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img th:src="@{|/images/${detail.product.image}|}" class="rounded border me-2" style="width: 35px; height: 35px; object-fit: cover;">
+                                <span class="fw-bold" th:text="${detail.product.name}"></span>
+                            </div>
+                        </td>
+                        <td class="text-end">[[${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                        <td class="text-center">[[${detail.quantity}]]</td>
+                        <td class="text-end fw-bold text-danger">
+                            [[${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'COMMA', 0, 'POINT')}]] ₫
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <th colspan="4" class="text-end text-uppercase">Tổng thanh toán:</th>
+                        <th class="text-end text-danger fs-5">
+                            [[${#numbers.formatDecimal(#aggregates.sum(order.orderDetails.![price * quantity]), 0, 'COMMA', 0, 'POINT')}]] ₫
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-center py-3">
+        <a th:href="@{/admin/order/index}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="bi bi-arrow-left"></i> QUAY LẠI DANH SÁCH
+        </a>
+    </div>
+</div>

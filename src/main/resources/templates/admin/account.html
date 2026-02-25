@@ -1,30 +1,56 @@
-<div class="card shadow-sm">
-    <div class="card-header bg-info text-white fw-bold">QUẢN LÝ TÀI KHOẢN</div>
-    <div class="card-body">
-        <div th:if="${message}" class="alert alert-success">[[${message}]]</div>
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr><th>Username</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Cấp quyền</th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="acc : ${items}">
-                    <td>[[${acc.username}]]</td>
-                    <td>[[${acc.fullname}]]</td>
-                    <td>[[${acc.email}]]</td>
-                    <td>
-                        <span th:if="${acc.admin}" class="badge bg-danger">Admin</span>
-                        <span th:unless="${acc.admin}" class="badge bg-secondary">User</span>
-                    </td>
-                    <td>
-                        <form action="/admin/account/update-role" method="post">
-                            <input type="hidden" name="username" th:value="${acc.username}">
-                            <input type="hidden" name="admin" th:value="${!acc.admin}">
-                            <button th:if="${acc.admin}" class="btn btn-sm btn-outline-secondary">Hủy Admin</button>
-                            <button th:unless="${acc.admin}" class="btn btn-sm btn-outline-danger">Cấp Admin</button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-people-fill me-2"></i>QUẢN LÝ TÀI KHOẢN</span>
+        <span class="badge bg-info" th:text="${items.size() + ' thành viên'}"></span>
+    </div>
+    <div class="card-body p-0">
+        <div th:if="${message}" class="alert alert-success m-3 py-2 small">
+            <i class="bi bi-check-circle-fill me-1"></i> [[${message}]]
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-center small">
+                    <tr>
+                        <th>Username</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Cấp quyền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="acc : ${items}" class="text-center">
+                        <td class="fw-bold text-primary">[[${acc.username}]]</td>
+                        <td class="text-start">[[${acc.fullname}]]</td>
+                        <td class="text-start small">[[${acc.email}]]</td>
+                        <td>
+                            <span th:if="${acc.admin}" class="badge bg-danger">Admin</span>
+                            <span th:unless="${acc.admin}" class="badge bg-secondary">User</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/account/update-role}" method="post">
+                                <input type="hidden" name="username" th:value="${acc.username}">
+                                <input type="hidden" name="admin" th:value="${!acc.admin}">
+                                <button th:if="${acc.admin}" class="btn btn-sm btn-link text-decoration-none text-secondary p-0">
+                                    <i class="bi bi-person-dash"></i> Hủy Admin
+                                </button>
+                                <button th:unless="${acc.admin}" class="btn btn-sm btn-link text-decoration-none text-danger p-0">
+                                    <i class="bi bi-person-check"></i> Cấp Admin
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <a th:href="@{|/admin/account/delete/${acc.username}|}" 
+                               class="btn btn-sm btn-outline-danger border-0"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.')">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

@@ -3,9 +3,7 @@ package poly.com.asm.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import poly.com.asm.entity.Account;
@@ -39,6 +37,18 @@ public class AccountAController {
 			}
 		} catch (Exception e) {
 			params.addFlashAttribute("message", "Lỗi cập nhật quyền!");
+		}
+		return "redirect:/admin/account/index";
+	}
+
+	@RequestMapping("/delete/{username}")
+	public String delete(@PathVariable("username") String username, RedirectAttributes params) {
+		try {
+
+			accountService.delete(username);
+			params.addFlashAttribute("message", "Đã xóa thành công tài khoản: " + username);
+		} catch (Exception e) {
+			params.addFlashAttribute("message", "Không thể xóa tài khoản này vì đã có lịch sử đặt hàng!");
 		}
 		return "redirect:/admin/account/index";
 	}
