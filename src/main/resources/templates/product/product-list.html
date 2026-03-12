@@ -1,3 +1,21 @@
+<style>
+    /* Hiệu ứng hover cho thẻ sản phẩm chuyên nghiệp hơn */
+    .product-card { 
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        cursor: pointer;
+    }
+    .product-card:hover { 
+        transform: translateY(-8px); 
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important; 
+    }
+    .card-img-top {
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+</style>
+
 <div class="container-fluid p-0">
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3">
@@ -25,7 +43,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary fw-bold">LỌC</button>
+                    <button type="submit" class="btn btn-primary fw-bold shadow-sm">LỌC</button>
                 </div>
             </form>
         </div>
@@ -48,6 +66,7 @@
                                  onerror="this.onerror=null; this.src='/images/default.png';"
                                  class="card-img-top" style="height: 220px; object-fit: cover;">
                         </a>
+                        
                         <div class="card-body text-center p-2">
                             <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">[[${p.category.name}]]</small>
                             <h6 class="card-title text-truncate mb-1">
@@ -59,10 +78,11 @@
                                 [[${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}]] ₫
                             </div>
                         </div>
+
                         <div class="card-footer bg-white border-0 p-2 pt-0">
-                            <button th:onclick="'addToCart(' + ${p.id} + ')'" class="btn btn-dark w-100 btn-sm shadow-sm">
+                            <a th:href="@{|/product/detail/${p.id}|}" class="btn btn-dark w-100 btn-sm shadow-sm fw-bold py-2">
                                 <i class="bi bi-cart-plus me-1"></i> MUA NGAY
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -78,7 +98,7 @@
                             <li class="page-item" th:classappend="${page.first} ? 'disabled'">
                                 <a class="page-link" th:href="@{/home/index(p=${page.number - 1}, keywords=${param.keywords}, cid=${param.cid}, sort=${param.sort})}"><i class="bi bi-chevron-left"></i></a>
                             </li>
-                            <li class="page-item active"><span class="page-link">[[${page.number + 1}]]</span></li>
+                            <li class="page-item active"><span class="page-link shadow-sm">[[${page.number + 1}]]</span></li>
                             <li class="page-item" th:classappend="${page.last} ? 'disabled'">
                                 <a class="page-link" th:href="@{/home/index(p=${page.number + 1}, keywords=${param.keywords}, cid=${param.cid}, sort=${param.sort})}"><i class="bi bi-chevron-right"></i></a>
                             </li>

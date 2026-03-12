@@ -123,7 +123,7 @@
                                         <td>
                                             <span th:each="s : ${p.sizes}" class="badge bg-light text-dark border me-1" style="font-size: 0.65rem;" th:text="${s.sizeValue}"></span>
                                         </td>
-                                        <td class="text-danger fw-bold small">[[${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                                        <td class="text-danger fw-bold small">[[${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}]] VNĐ</td>
                                         <td>
                                             <a th:href="@{|/admin/product/edit/${p.id}|}" class="btn btn-sm btn-outline-info border-0"><i class="bi bi-pencil-square"></i></a> 
                                             <a th:href="@{|/admin/product/delete/${p.id}|}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Bạn chắc chắn muốn xóa?')"><i class="bi bi-trash"></i></a>
