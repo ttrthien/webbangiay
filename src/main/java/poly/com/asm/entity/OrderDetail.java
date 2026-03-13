@@ -7,21 +7,20 @@ import lombok.*;
 @Entity
 @Table(name = "Orderdetails")
 public class OrderDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private Double price;
-    private Integer quantity;
-    
-    private Integer size; 
+	private Double price;
+	private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "Orderid")
-    private Order order;
+	private Integer size;
 
-    @ManyToOne
-    @JoinColumn(name = "Productid")
-    private Product product;
-    
+	@ManyToOne
+	@JoinColumn(name = "OrderId", referencedColumnName = "Id")
+	private Order order;
+
+	@ManyToOne
+	@JoinColumn(name = "ProductId", referencedColumnName = "Id")
+	private Product product;
 }

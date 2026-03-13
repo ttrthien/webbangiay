@@ -9,4 +9,5 @@ import poly.com.asm.entity.Order;
 
 public interface OrderDAO extends JpaRepository<Order, Long> {
 	List<Order> findByAccount(Account account);
+	List<Order> findByAccountUsername(String username);
 }
