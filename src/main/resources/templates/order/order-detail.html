@@ -99,7 +99,7 @@
 				</div>
 			</div>
 		</div>
-		<div th:if="${session.account.admin}" class="mt-3 d-flex gap-2">
+		<div th:if="${session.account != null and session.account.admin}" class="mt-3 d-flex gap-2">
 
 			<a th:href="@{/order/pay-confirm/{id}(id=${order.id})}"
 				class="btn btn-success">  Xác nhận thanh toán </a> <a
