@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="UTF-8">
 <title>Chi tiết đơn hàng</title>
@@ -73,13 +74,13 @@
 							<td class="text-center" th:text="${detail.size}"></td>
 
 							<td class="text-center"
-								th:text="${#numbers.formatDecimal(detail.price,0,'COMMA',0,'POINT')} + ' ₫'">
+								th:text="${#numbers.formatDecimal(detail.price,0,'COMMA',0,'POINT')} + ' VNĐ'">
 							</td>
 
 							<td class="text-center" th:text="${detail.quantity}"></td>
 
-							<td class="text-right text-danger font-weight-bold"
-								th:text="${#numbers.formatDecimal(detail.price * detail.quantity,0,'COMMA',0,'POINT')} + ' ₫'">
+							<td class="text-center text-danger font-weight-bold"
+								th:text="${#numbers.formatDecimal(detail.price * detail.quantity,0,'COMMA',0,'POINT')} + ' VNĐ'">
 							</td>
 
 						</tr>
@@ -99,14 +100,13 @@
 				</div>
 			</div>
 		</div>
-		<div th:if="${session.account != null and session.account.admin}" class="mt-3 d-flex gap-2">
-
+		<div th:if="${session.user != null and session.user.admin}" class="mt-3 d-flex gap-2">
 			<a th:href="@{/order/pay-confirm/{id}(id=${order.id})}"
-				class="btn btn-success">  Xác nhận thanh toán </a> <a
+				class="btn btn-success"> Xác nhận thanh toán </a> <a
 				th:href="@{/order/deliver/{id}(id=${order.id})}"
-				class="btn btn-info">  Bắt đầu giao </a> <a
+				class="btn btn-info"> Bắt đầu giao </a> <a
 				th:href="@{/order/delivered/{id}(id=${order.id})}"
-				class="btn btn-primary">  Đã giao </a>
+				class="btn btn-primary"> Đã giao </a>
 
 		</div>
 </body>
