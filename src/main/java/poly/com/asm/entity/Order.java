@@ -2,6 +2,9 @@ package poly.com.asm.entity;
 
 import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -25,6 +28,7 @@ public class Order {
 	@JoinColumn(name = "Username")
 	private Account account;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	private List<OrderDetail> orderDetails;
 	@Column(name = "status")

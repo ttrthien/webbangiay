@@ -1,6 +1,9 @@
 package poly.com.asm.entity;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -27,6 +30,7 @@ public class Account {
     private Boolean activated;
     private Boolean admin;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "account")
     private List<Order> orders;
     

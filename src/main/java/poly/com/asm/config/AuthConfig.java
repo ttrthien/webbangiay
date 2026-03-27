@@ -9,18 +9,32 @@ import poly.com.asm.interceptor.GlobalInterceptor;
 
 @Configuration
 public class AuthConfig implements WebMvcConfigurer {
-	@Autowired
-	AuthInterceptor authInterceptor;
+    @Autowired
+    AuthInterceptor authInterceptor;
 
-	@Autowired
-	GlobalInterceptor globalInterceptor;
+    @Autowired
+    GlobalInterceptor globalInterceptor;
 
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(globalInterceptor).addPathPatterns("/**").excludePathPatterns("/static/**",
-				"/images/**");
-		registry.addInterceptor(authInterceptor)
-				.addPathPatterns("/order/**", "/account/edit-profile", "/account/change-password", "/admin/**")
-				.excludePathPatterns("/auth/**", "/static/**", "/images/**");
-	}
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(globalInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/static/**", "/images/**", "/api/**"); 
+
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns(
+                    "/order/**", 
+                    "/account/edit-profile", 
+                    "/account/change-password", 
+                    "/admin/**",      
+                    "/api/admin/**",  
+                    "/api/cart/checkout" 
+                )
+                .excludePathPatterns(
+                    "/auth/**", 
+                    "/api/auth/**", 
+                    "/static/**", 
+                    "/images/**"
+                );
+    }
 }

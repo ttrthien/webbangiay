@@ -1,6 +1,9 @@
 package poly.com.asm.entity;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +17,7 @@ public class Category {
     private String id;
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 }

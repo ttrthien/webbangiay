@@ -15,15 +15,29 @@ public class AuthInterceptor implements HandlerInterceptor {
         Account user = (Account) session.getAttribute("user");
         String uri = request.getRequestURI();
 
+        boolean isApiRequest = uri.startsWith("/api/");
+
         if (user == null) {
+            if (isApiRequest) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Vui long dang nhap!\"}");
+                return false;
+            }
             session.setAttribute("back-url", uri);
             response.sendRedirect("/auth/login?error=Vui long dang nhap!");
             return false;
         }
 
-        if (uri.startsWith("/admin/") && !user.getAdmin()) {
-            response.sendRedirect("/auth/login?error=Access-Denied-Admin-Only");
-            return false;
+        if (uri.startsWith("/admin/") || uri.startsWith("/api/admin/")) {
+            if (!user.getAdmin()) {
+                if (isApiRequest) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("{\"error\": \"Access-Denied-Admin-Only\"}");
+                    return false;
+                }
+                response.sendRedirect("/auth/login?error=Access-Denied-Admin-Only");
+                return false;
+            }
         }
 
         return true;
