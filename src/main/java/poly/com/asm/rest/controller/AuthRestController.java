@@ -1,4 +1,4 @@
-package poly.com.asm.controller;
+package poly.com.asm.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -22,4 +22,7 @@ public interface ProductDAO extends JpaRepository<Product, Integer> {
 
 	@Query("SELECT p FROM Product p LEFT JOIN p.orderDetails od GROUP BY p ORDER BY COUNT(od) DESC")
 	Page<Product> findTopSelling(Pageable pageable);
+
+	@Query("SELECT p FROM Product p WHERE p.name LIKE %?1%")
+    List<Product> findByKeywords(String keywords);
 }
