@@ -50,4 +50,10 @@ public class OrderServiceImpl implements OrderService {
 	public void delete(Long id) {
 		odao.deleteById(id);
 	}
+
+	@Override
+	public Order save(Order order) {
+		// TODO Auto-generated method stub
+		return odao.save(order);
+	}
 }
