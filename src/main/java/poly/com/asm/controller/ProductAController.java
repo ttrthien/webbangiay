@@ -35,18 +35,18 @@ public class ProductAController {
                        RedirectAttributes params) {
         String msg = (item.getId() != null) ? "Cập nhật sản phẩm thành công!" : "Thêm mới sản phẩm thành công!";
         
-        // XỬ LÝ ẢNH - Đã sửa lỗi đường dẫn
+    
         if (!file.isEmpty()) {
-            // Chỉ truyền "images", không truyền "/images/" để tránh lỗi Disk Write
+            
             paramService.save(file, "images"); 
             item.setImage(file.getOriginalFilename());
         } else if (item.getId() != null) {
-            // Giữ lại tên ảnh cũ từ database nếu người dùng không chọn file mới
+            
             Product oldProduct = productService.findById(item.getId());
             item.setImage(oldProduct.getImage());
         }
 
-        // LƯU SẢN PHẨM
+    
         if (item.getId() != null) {
             productService.update(item);
         } else {

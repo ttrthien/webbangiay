@@ -26,13 +26,11 @@ public class AuthConfig implements WebMvcConfigurer {
                     "/order/**", 
                     "/account/edit-profile", 
                     "/account/change-password", 
-                    "/admin/**",      
-                    "/api/admin/**",  
-                    "/api/cart/checkout" 
+                    "/admin/**" 
                 )
                 .excludePathPatterns(
                     "/auth/**", 
-                    "/api/auth/**", 
+                    "/api/**", 
                     "/static/**", 
                     "/images/**"
                 );
