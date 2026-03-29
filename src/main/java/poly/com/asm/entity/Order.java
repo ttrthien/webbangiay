@@ -33,7 +33,8 @@ public class Order {
 	private List<OrderDetail> orderDetails;
 	@Column(name = "status")
 	private Integer status = 0;
-
+	@Column(name = "Paymentstatus")
+	private String paymentStatus;
 	@Column(name = "Paymentmethod")
 	private String paymentMethod;
 }
