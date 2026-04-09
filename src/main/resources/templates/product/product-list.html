@@ -61,7 +61,8 @@
             <div class="row">
                 <div th:each="p : ${page.content}" class="col-6 col-md-3 mb-4">
                     <div class="card h-100 product-card border-0 shadow-sm position-relative overflow-hidden">
-                        <a th:href="@{|/product/detail/${p.id}|}">
+                        
+                        <a href="javascript:void(0)" th:onclick="'showPage(\'/product/detail\', ' + ${p.id} + ')'">
                             <img th:src="@{|/images/${p.image}|}" 
                                  onerror="this.onerror=null; this.src='/images/default.png';"
                                  class="card-img-top" style="height: 220px; object-fit: cover;">
@@ -70,7 +71,8 @@
                         <div class="card-body text-center p-2">
                             <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">[[${p.category.name}]]</small>
                             <h6 class="card-title text-truncate mb-1">
-                                <a th:href="@{|/product/detail/${p.id}|}" class="text-decoration-none text-dark fw-bold small">
+                                <a href="javascript:void(0)" th:onclick="'showPage(\'/product/detail\', ' + ${p.id} + ')'" 
+                                   class="text-decoration-none text-dark fw-bold small">
                                     [[${p.name}]]
                                 </a>
                             </h6>
@@ -80,9 +82,10 @@
                         </div>
 
                         <div class="card-footer bg-white border-0 p-2 pt-0">
-                            <a th:href="@{|/product/detail/${p.id}|}" class="btn btn-dark w-100 btn-sm shadow-sm fw-bold py-2">
+                            <button th:onclick="'showPage(\'/product/detail\', ' + ${p.id} + ')'" 
+                                    class="btn btn-dark w-100 btn-sm shadow-sm fw-bold py-2">
                                 <i class="bi bi-cart-plus me-1"></i> MUA NGAY
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>

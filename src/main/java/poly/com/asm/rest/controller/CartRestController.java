@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import poly.com.asm.model.CartItem;
 import poly.com.asm.service.CartService;
 
-// @CrossOrigin("*")
+// @CrossOrigin("*") // Giữ lại để đảm bảo Frontend gọi API không bị chặn
 @RestController
 @RequestMapping("/api/cart")
 public class CartRestController {

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import poly.com.asm.dao.ProductDAO;
 import poly.com.asm.entity.Product;
 
-// @CrossOrigin("*")
+// @CrossOrigin(origins = "*", allowedHeaders = "*") // Cấu hình mở để Frontend dễ kết nối trong quá trình làm
 @RestController
 @RequestMapping("/api/products")
 public class ProductRestController {

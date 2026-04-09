@@ -10,7 +10,7 @@ import poly.com.asm.model.LoginRequest;
 import java.util.Map;
 import java.util.HashMap;
 
-// @CrossOrigin("*") 
+// @CrossOrigin("*") // Giữ lại dòng này để Hòa Frontend gọi API từ máy khác không bị lỗi
 @RestController
 @RequestMapping("/api/auth")
 public class AuthRestController {
@@ -75,7 +75,7 @@ public class AuthRestController {
     // 4. API Đăng xuất: Hủy Session lập tức
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        session.invalidate(); // Xóa sạch dữ liệu và hủy Session ID trên Server
+        session.invalidate(); 
         
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);

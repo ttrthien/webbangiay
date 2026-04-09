@@ -34,3 +34,42 @@
         </div>
     </div>
 </div>
+<div style="width: 600px; margin: 20px auto;">
+    <canvas id="revenueChart"></canvas>
+</div>
+
+<script>
+    // Gọi API lấy dữ liệu thống kê
+    axios.get('/api/admin/report/revenue')
+        .then(response => {
+            const data = response.data;
+            
+            // Tách dữ liệu cho Chart.js
+            const labels = data.map(item => item.group);  // Tên danh mục
+            const revenues = data.map(item => item.sum);  // Doanh thu
+            
+            // Vẽ biểu đồ
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu theo danh mục',
+                        data: revenues,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', 
+                            '#4BC0C0', '#9966FF', '#FF9F40'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Thống kê doanh thu theo danh mục' }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Lỗi:', error));
+</script>

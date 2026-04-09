@@ -29,7 +29,7 @@ public class Order {
 	private Account account;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER,orphanRemoval = true)
 	private List<OrderDetail> orderDetails;
 	@Column(name = "status")
 	private Integer status = 0;

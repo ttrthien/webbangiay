@@ -1,112 +1,67 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Lịch sử đơn hàng</title>
+    <meta charset="UTF-8">
+    <title>Lịch sử đơn hàng</title>
 </head>
-
 <body>
+    <div class="container mt-4 mb-5">
+        <div class="card shadow border-0">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+                <h4 class="mb-0"><i class="bi bi-card-list me-2"></i>LỊCH SỬ ĐẶT HÀNG</h4>
+                <span class="badge bg-white text-primary fw-bold" th:text="${orders.size()} + ' đơn hàng'">0 đơn hàng</span>
+            </div>
 
-	<div class="container mt-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Mã ĐH</th>
+                                <th>Ngày đặt</th>
+                                <th>Địa chỉ giao hàng</th>
+                                <th class="text-center">Thanh toán</th>
+                                <th class="text-center">Giao hàng</th>
+                                <th class="text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}" class="align-middle">
+                                <td class="text-center fw-bold" th:text="${order.id}"></td>
+                                <td th:text="${#dates.format(order.createDate,'dd-MM-yyyy HH:mm')}"></td>
+                                <td th:text="${order.address}" class="small"></td>
 
-		<div class="card shadow">
+                                <td class="text-center">
+                                    <span th:if="${order.status == 0}" class="badge bg-warning text-dark">Chờ thanh toán</span>
+                                    <span th:if="${order.status >= 1}" class="badge bg-success">Đã thanh toán</span>
+                                </td>
 
-			<div
-				class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-				<h4 class="mb-0">
-					<i class="fas fa-list-alt"></i> LỊCH SỬ ĐẶT HÀNG
-				</h4>
+                                <td class="text-center">
+                                    <span th:if="${order.status == 0}" class="badge bg-secondary">Đang xử lý</span>
+                                    <span th:if="${order.status == 1}" class="badge bg-warning text-dark">Chuẩn bị giao</span>
+                                    <span th:if="${order.status == 2}" class="badge bg-info">Đang giao</span>
+                                    <span th:if="${order.status == 3}" class="badge bg-success">Đã giao hàng</span>
+                                </td>
 
-				<span class="badge badge-light"
-					th:text="${orders.size()} + ' đơn hàng'"> 0 đơn hàng </span>
+                                <td class="text-center">
+                                    <button th:onclick="'showPage(\'/order/detail\', ' + ${order.id} + ')'" 
+                                            class="btn btn-sm btn-info fw-bold text-white px-3 shadow-sm">
+                                        Xem chi tiết
+                                    </button>
+                                </td>
+                            </tr>
 
-			</div>
-
-
-			<div class="card-body p-0">
-
-				<table class="table table-hover mb-0">
-
-					<thead class="thead-light">
-
-						<tr>
-
-							<th class="text-center">Mã ĐH</th>
-							<th>Ngày đặt</th>
-							<th>Địa chỉ giao hàng</th>
-							<th class="text-center">Trạng thái thanh toán</th>
-							<th class="text-center">Đơn hàng của bạn đang</th>
-							<th class="text-center">Hành động</th>
-
-						</tr>
-
-					</thead>
-
-
-					<tbody>
-
-						<tr th:each="order : ${orders}">
-
-							<td class="text-center font-weight-bold" th:text="${order.id}">
-							</td>
-
-							<td
-								th:text="${#dates.format(order.createDate,'dd-MM-yyyy HH:mm')}">
-							</td>
-
-							<td th:text="${order.address}"></td>
-
-
-							<!-- trạng thái thanh toán -->
-
-							<td class="text-center"><span th:if="${order.status == 0}"
-								class="badge bg-warning text-dark"> Chờ thanh toán </span> <span
-								th:if="${order.status >= 1}" class="badge bg-success"> Đã
-									thanh toán </span></td>
-
-
-							<!-- trạng thái giao hàng -->
-
-							<td class="text-center"><span th:if="${order.status == 0}"
-								class="badge bg-secondary"> Đang xử lý </span> <span
-								th:if="${order.status == 1}" class="badge bg-warning text-dark">
-									Chuẩn bị giao </span> <span th:if="${order.status == 2}"
-								class="badge bg-info">  Đang giao </span> <span
-								th:if="${order.status == 3}" class="badge bg-success"> 
-									Đã giao hàng </span></td>
-
-
-							<td class="text-center"><a
-								th:href="@{|/order/detail/${order.id}|}"
-								class="btn btn-sm btn-info"> Xem chi tiết </a></td>
-
-						</tr>
-
-
-						<tr th:if="${#lists.isEmpty(orders)}">
-
-							<td colspan="6" class="text-center py-4 text-muted"><i>
-									Bạn chưa có đơn hàng nào. <a th:href="@{/home/index}">Mua
-										sắm ngay!</a>
-							</i></td>
-
-						</tr>
-
-					</tbody>
-
-				</table>
-
-			</div>
-
-
-			<div class="card-footer text-muted small">* Nhấn "Xem chi tiết"
-				để xem sản phẩm trong từng đơn hàng</div>
-
-
-		</div>
-
-	</div>
-
+                            <tr th:if="${#lists.isEmpty(orders)}">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <p class="mb-2">Bạn chưa có đơn hàng nào.</p>
+                                    <button onclick="showPage('/home/index')" class="btn btn-primary btn-sm px-4">Mua sắm ngay!</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>

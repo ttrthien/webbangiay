@@ -2,6 +2,7 @@ package poly.com.asm.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import poly.com.asm.interceptor.AuthInterceptor;
@@ -14,41 +15,43 @@ public class AuthConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // Interceptor toàn cục
+        // 1. Interceptor toàn cục: Chạy cho tất cả mọi request
         registry.addInterceptor(globalInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/static/**", "/images/**"); 
+                .excludePathPatterns("/static/**", "/images/**", "/assets/**"); 
 
-        // Interceptor bảo mật (Bác bảo vệ)
+        // 2. Interceptor bảo mật (Bác bảo vệ): Kiểm tra đăng nhập/phân quyền
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns(
-                    // Bảo vệ các trang HTML cũ
+                    // Bảo vệ các trang HTML (MVC cũ)
                     "/order/**", 
                     "/account/edit-profile", 
                     "/account/change-password", 
                     "/admin/**",
                     
-                    // Bảo vệ các API mới
+                    // Bảo vệ các REST API (Quan trọng cho Giai đoạn 2)
                     "/api/admin/**",
-                    "/api/account/**",       // <-- Bảo vệ 2 API của TÂN ở đây
-                    "/api/orders/checkout"   // <-- Bảo vệ API của Thiện
+                    "/api/account/**",       // Bảo vệ API Profile/Đổi mật khẩu của Tân
+                    "/api/orders/checkout"   // Bảo vệ API Thanh toán của Thiện
                 )
                 .excludePathPatterns(
-                    // Những API mở cửa tự do
+                    // Các API cho phép truy cập tự do không cần login
                     "/auth/**", 
-                    "/api/auth/**",     // Cho phép Login/Register tự do
-                    "/api/products/**", // Cho phép khách xem sản phẩm tự do
-                    "/api/cart/**",     // Cho phép khách thao tác giỏ hàng tự do
+                    "/api/auth/**",     
+                    "/api/products/**", 
+                    "/api/cart/**",     
+                    "/api/categories/**",
                     "/static/**", 
-                    "/images/**"
+                    "/images/**",
+                    "/assets/**"
                 );
     }
-    
-    // Giấy phép thông hành cho VueJS của team trưởng
+
     @Override
-    public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
+    public void addCorsMappings(CorsRegistry registry) {
+        // Cho phép Frontend (VueJS) gọi vào Backend
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:8080") // Chỉ cho phép VueJS chạy ở port 8080 gọi vào
+                .allowedOrigins("http://localhost:8080", "http://127.0.0.1:5500") // Thêm cổng 5500 nếu Hòa chạy Live Server
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowCredentials(true); 
     }
