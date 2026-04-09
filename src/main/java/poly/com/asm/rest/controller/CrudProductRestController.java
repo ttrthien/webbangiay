@@ -9,7 +9,7 @@ import poly.com.asm.service.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/api/admin/products")
 public class CrudProductRestController {
 
