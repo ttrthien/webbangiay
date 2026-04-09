@@ -1,101 +1,188 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Thanh toán</title>
+    <meta charset="UTF-8">
+    <title>Xác nhận đơn hàng</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-	<div class="container mt-4">
-		<h2 class="text-primary mb-4">XÁC NHẬN ĐƠN HÀNG</h2>
+<body class="bg-light">
+    <div class="container mt-4">
+        <h2 class="text-primary mb-4 text-center">XÁC NHẬN ĐƠN HÀNG</h2>
 
-		<form th:action="@{/order/confirm}" method="post">
-			<div class="row">
-				<div class="col-md-5">
-					<div class="card shadow-sm">
-						<div class="card-header bg-dark text-white">
-							<h5 class="mb-0">Thông tin người nhận</h5>
-						</div>
-						<div class="card-body">
-							<div class="mb-3">
-								<label class="form-label font-weight-bold">Người mua:</label> <input
-									type="text" class="form-control" th:value="${user.fullname}"
-									readonly>
-							</div>
-							<div class="mb-3">
-								<label class="form-label font-weight-bold">Ngày đặt:</label> <input
-									type="text" class="form-control"
-									th:value="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}"
-									readonly>
-							</div>
-							<div class="mb-3">
-								<label class="form-label font-weight-bold">Địa chỉ giao
-									hàng:</label>
-								<textarea class="form-control" name="address" rows="3"
-									placeholder="Nhập địa chỉ nhận hàng cụ thể..." required></textarea>
-							</div>
-							<div class="mt-4 border p-3 rounded bg-light">
-								<label class="form-label font-weight-bold d-block"><i
-									class="bi bi-wallet2"></i> Phương thức thanh toán:</label>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio"
-										name="paymentMethod" id="cod" value="COD" checked> <label
-										class="form-check-label" for="cod">Tiền mặt (COD)</label>
-								</div>
-								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio"
-										name="paymentMethod" id="vnpay" value="VNPAY"> <label
-										class="form-check-label" for="vnpay">Online (VNPay)</label>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-person-fill"></i> Thông tin người nhận</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Người mua:</label> 
+                            <input type="text" id="fullname" class="form-control bg-white" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày đặt:</label> 
+                            <input type="text" id="orderDate" class="form-control bg-white" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Địa chỉ giao hàng:</label>
+                            <textarea id="address" class="form-control" rows="3"
+                                placeholder="Nhập địa chỉ nhận hàng cụ thể (Số nhà, tên đường, phường/xã...)" required></textarea>
+                        </div>
+                        <div class="mt-4 border p-3 rounded bg-light">
+                            <label class="form-label fw-bold d-block mb-2">Phương thức thanh toán:</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked> 
+                                <label class="form-check-label" for="cod">Tiền mặt (COD)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY"> 
+                                <label class="form-check-label" for="vnpay">Online (VNPay)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-				<div class="col-md-7">
-					<div class="card shadow-sm">
-						<div class="card-header bg-info text-white">
-							<h5 class="mb-0">Sản phẩm đã chọn</h5>
-						</div>
-						<div class="card-body p-0">
-							<table class="table table-hover mb-0">
-								<thead class="table-light">
-									<tr>
-										<th>Sản phẩm</th>
-										<th class="text-center">Số lượng</th>
-										<th class="text-right">Giá</th>
-										<th class="text-right">Tổng</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr th:each="item : ${cart.items}">
-										<td th:text="${item.name}">Tên giày</td>
-										<td class="text-center" th:text="${item.qty}">1</td>
-										<td class="text-right"
-											th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0</td>
-										<td class="text-right font-weight-bold text-danger"
-											th:text="${#numbers.formatDecimal(item.price * item.qty, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0</td>
-									</tr>
-								</tbody>
-								<tfoot class="bg-light">
-									<tr>
-										<td colspan="3" class="text-right font-weight-bold">TỔNG
-											THANH TOÁN:</td>
-										<td class="text-right font-weight-bold text-danger h5"
-											th:text="${#numbers.formatDecimal(cart.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0</td>
-									</tr>
-								</tfoot>
-							</table>
-						</div>
-						<div class="card-footer text-right">
-							<a th:href="@{/cart/view}" class="btn btn-secondary mr-2">Quay
-								lại giỏ hàng</a>
-							<button type="submit" class="btn btn-success px-4">XÁC
-								NHẬN ĐẶT HÀNG</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-info text-white py-3">
+                        <h5 class="mb-0"><i class="bi bi-cart-check-fill"></i> Sản phẩm đã chọn</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th class="ps-3">Sản phẩm</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Giá</th>
+                                    <th class="text-end pe-3">Tổng</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-items">
+                                </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold py-3">TỔNG THANH TOÁN:</td>
+                                    <td class="text-end fw-bold text-danger h5 py-3 pe-3" id="total-amount">0 ₫</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 d-flex justify-content-between py-3">
+                        <a href="/cart/view" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                        <button type="button" onclick="confirmOrder()" class="btn btn-success px-5 fw-bold">
+                            XÁC NHẬN ĐẶT HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH QUAN TRỌNG: Ép Axios gửi kèm JSESSIONID để không bị trống giỏ hàng
+        axios.defaults.withCredentials = true;
+
+        // 1. Khởi tạo dữ liệu trang
+        async function initPage() {
+            document.getElementById('orderDate').value = new Date().toLocaleDateString('vi-VN');
+            
+            try {
+                // Gọi API lấy giỏ hàng
+                const resCart = await axios.get('/api/cart');
+                const { items, amount } = resCart.data;
+
+                // Nếu giỏ hàng trống, không cho ở lại trang này
+                if (!items || items.length === 0) {
+                    alert("Giỏ hàng của bạn đang trống!");
+                    window.location.href = "/home/index";
+                    return;
+                }
+                
+                // Đổ dữ liệu vào bảng
+                let html = '';
+                items.forEach(item => {
+                    html += `
+                        <tr class="align-middle">
+                            <td class="ps-3">
+                                <div class="fw-bold">${item.name}</div>
+                                <small class="text-muted">Size: ${item.size}</small>
+                            </td>
+                            <td class="text-center">${item.qty}</td>
+                            <td class="text-end">${item.price.toLocaleString('vi-VN')} ₫</td>
+                            <td class="text-end fw-bold text-danger pe-3">${(item.price * item.qty).toLocaleString('vi-VN')} ₫</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('cart-items').innerHTML = html;
+                document.getElementById('total-amount').innerText = amount.toLocaleString('vi-VN') + ' ₫';
+
+                // Lấy thông tin user (Nên lấy từ Session thay vì localStorage để bảo mật)
+                try {
+                    const resUser = await axios.get('/api/auth/profile'); // Giả định Thiện có API này
+                    document.getElementById('fullname').value = resUser.data.fullname;
+                } catch (e) {
+                    // Nếu không có API profile, dùng tạm localStorage Hòa đã làm
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if(user) document.getElementById('fullname').value = user.username;
+                }
+
+            } catch (error) {
+                console.error("Lỗi tải trang:", error);
+                if (error.response?.status === 401) {
+                    alert("Vui lòng đăng nhập trước khi thanh toán!");
+                    window.location.href = "/auth/login";
+                }
+            }
+        }
+
+        // 2. Hàm xử lý nút "Xác nhận đặt hàng"
+        async function confirmOrder() {
+            const address = document.getElementById('address').value.trim();
+            const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            if(!address) {
+                alert("Vui lòng nhập địa chỉ giao hàng cụ thể!");
+                document.getElementById('address').focus();
+                return;
+            }
+
+            // Hiển thị loading (nếu có)
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = "Đang xử lý...";
+
+            const orderBody = {
+                address: address,
+                paymentMethod: method
+            };
+
+            try {
+                // Gọi API checkout của Thiện
+                const res = await axios.post('/api/orders/checkout', orderBody);
+                
+                if(res.data.success) {
+                    if(method === 'VNPAY') {
+                        // Nếu là VNPay, trình duyệt tự chuyển sang trang ngân hàng
+                        window.location.href = res.data.vnpayUrl;
+                    } else {
+                        alert("Đặt hàng thành công! Chúng tôi sẽ sớm liên hệ với bạn.");
+                        window.location.href = "/order/list"; // Hoặc trang lịch sử đơn hàng
+                    }
+                }
+            } catch (error) {
+                const errorMsg = error.response?.data?.message || "Hệ thống bận, vui lòng thử lại sau!";
+                alert("Lỗi đặt hàng: " + errorMsg);
+                btn.disabled = false;
+                btn.innerHTML = "XÁC NHẬN ĐẶT HÀNG";
+            }
+        }
+
+        initPage();
+    </script>
 </body>
 </html>
