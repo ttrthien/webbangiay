@@ -8,7 +8,7 @@ import poly.com.asm.service.CategoryService;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/api/admin/categories")
 public class CategoryRestController {
 

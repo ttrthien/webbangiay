@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/api/orders") // Đổi gốc thành /api/orders để dùng chung cho cả User và Admin
 public class OrderRestController {
 
@@ -32,6 +32,7 @@ public class OrderRestController {
 
     @PostMapping("/checkout") // Đường dẫn đầy đủ: /api/orders/checkout
     public ResponseEntity<?> checkout(@RequestBody Order orderData, HttpServletRequest request) {
+    	
         Account user = (Account) session.getAttribute("user");
         
         if (user == null) {

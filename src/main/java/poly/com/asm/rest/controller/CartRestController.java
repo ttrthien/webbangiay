@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import poly.com.asm.model.CartItem;
 import poly.com.asm.service.CartService;
 
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("/api/cart")
 public class CartRestController {
