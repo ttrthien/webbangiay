@@ -1,42 +1,57 @@
 <div class="card shadow-sm">
     <div class="card-header bg-info text-white fw-bold py-3">
-        <i class="fas fa-user-edit me-2"></i> CẬP NHẬT TÀI KHOẢN
+        <i class="bi bi-person-badge me-2"></i> CẬP NHẬT TÀI KHOẢN
     </div>
     <div class="card-body">
-        <div th:if="${message != null}" class="alert alert-success alert-dismissible fade show">
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-
-        <form th:action="@{/account/edit-profile}" method="post" th:object="${user}">
+        <form id="profileForm" onsubmit="updateProfile(event)">
             <div class="mb-3">
                 <label class="form-label fw-bold">Tên đăng nhập</label>
-                <input th:field="*{username}" class="form-control bg-light" readonly>
+                <input id="username" th:value="${user.username}" class="form-control bg-light" readonly>
             </div>
             
             <div class="mb-3">
                 <label class="form-label fw-bold">Họ và tên</label>
-                <input th:field="*{fullname}" class="form-control" placeholder="Nhập họ tên mới">
-                <div class="text-danger small" th:if="${#fields.hasErrors('fullname')}" th:errors="*{fullname}"></div>
+                <input id="fullname" th:value="${user.fullname}" class="form-control" placeholder="Nhập họ tên mới" required>
             </div>
             
             <div class="mb-3">
                 <label class="form-label fw-bold">Email</label>
-                <input th:field="*{email}" class="form-control" type="email" placeholder="example@gmail.com">
-                <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                <input id="email" th:value="${user.email}" class="form-control" type="email" placeholder="example@gmail.com" required>
             </div>
 
-            <input type="hidden" th:field="*{photo}">
-            <input type="hidden" th:field="*{password}">
-            <input type="hidden" th:field="*{activated}">
-            <input type="hidden" th:field="*{admin}">
+            <input type="hidden" id="photo" th:value="${user.photo}">
             
             <hr>
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary fw-bold">
-                    <i class="fas fa-save me-2"></i> LƯU THAY ĐỔI
+                    <i class="bi bi-save me-2"></i> LƯU THAY ĐỔI
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    async function updateProfile(event) {
+        event.preventDefault(); // Ngăn trang web load lại
+        
+        const data = {
+            fullname: document.getElementById('fullname').value,
+            email: document.getElementById('email').value,
+            photo: document.getElementById('photo').value
+        };
+
+        try {
+            const response = await axios.put('/api/account/profile', data);
+            if (response.data.success) {
+                Swal.fire('Thành công', response.data.message, 'success');
+                // Cập nhật tên hiển thị trên Navbar nếu cần
+                const navbarName = document.querySelector('.navbar-nav .dropdown-toggle');
+                if(navbarName) navbarName.innerHTML = `<i class="bi bi-person-circle me-1"></i> ${data.fullname}`;
+            }
+        } catch (error) {
+            const msg = error.response?.data?.message || "Lỗi cập nhật!";
+            Swal.fire('Lỗi', msg, 'error');
+        }
+    }
+</script>
