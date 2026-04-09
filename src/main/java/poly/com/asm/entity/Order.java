@@ -25,7 +25,6 @@ public class Order {
 	private String address;
 
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name = "Username")
 	private Account account;
 

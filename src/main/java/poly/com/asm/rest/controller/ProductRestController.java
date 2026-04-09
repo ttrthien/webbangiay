@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import poly.com.asm.dao.ProductDAO;
 import poly.com.asm.entity.Product;
-import poly.com.asm.entity.Size;
 
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/api/products")
 public class ProductRestController {
@@ -59,24 +58,5 @@ public class ProductRestController {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Product> data = productDao.findByCategoryId(cid, pageable);
 		return ResponseEntity.ok(data);
-	}
-
-	@GetMapping("/{id}/sizes")
-	public ResponseEntity<?> getSizes(@PathVariable Integer id) {
-		Optional<Product> product = productDao.findById(id);
-
-		if (product.isPresent()) {
-			return ResponseEntity.ok(product.get().getSizes());
-		}
-		return ResponseEntity.status(404).body("Không tìm thấy sản phẩm");
-	}
-
-	@GetMapping("/advanced-search")
-	public ResponseEntity<?> advancedSearch(@RequestParam(required = false) String keyword,
-			@RequestParam(required = false) Double minPrice, @RequestParam(required = false) Double maxPrice,
-			@RequestParam(required = false) String categoryId, @RequestParam(required = false) Integer sizeId) {
-		List<Product> result = productDao.searchAdvanced(keyword, minPrice, maxPrice, categoryId, sizeId);
-
-		return ResponseEntity.ok(result);
 	}
 }

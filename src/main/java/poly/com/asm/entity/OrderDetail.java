@@ -1,7 +1,5 @@
 package poly.com.asm.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +17,6 @@ public class OrderDetail {
 	private Integer size;
 
 	@ManyToOne
-	@JsonIgnore
 	@JoinColumn(name = "OrderId", referencedColumnName = "Id")
 	private Order order;
 
