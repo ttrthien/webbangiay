@@ -1,13 +1,11 @@
 package poly.com.asm.model;
 
 import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor // Tạo constructor 6 tham số cho Doanh thu
+@AllArgsConstructor 
 public class ReportItem implements Serializable {
     private Serializable group;
     private Double sum;
@@ -16,7 +14,7 @@ public class ReportItem implements Serializable {
     private Double min;
     private Double avg;
 
-    // Giữ lại Constructor 3 tham số này để hàm getTop10VIP không bị lỗi
+    // Constructor 3 tham số cực kỳ quan trọng cho trang VIP
     public ReportItem(Serializable group, Double sum, Long count) {
         this.group = group;
         this.sum = sum;

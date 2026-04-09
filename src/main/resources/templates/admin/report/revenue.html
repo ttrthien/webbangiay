@@ -1,75 +1,84 @@
-<div class="card shadow-sm border-0 rounded-3">
-    <div class="card-header bg-success text-white fw-bold py-3 text-uppercase">
-        <i class="bi bi-bar-chart-fill me-2"></i> THỐNG KÊ DOANH THU THEO LOẠI HÀNG
+<div class="container-fluid p-0">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-success text-white fw-bold py-3 text-uppercase d-flex align-items-center">
+            <i class="bi bi-bar-chart-fill me-2 fs-4"></i> Thống kê doanh thu theo loại hàng
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle text-center mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-start ps-4">Loại sản phẩm</th> 
+                            <th>Tổng doanh thu</th> 
+                            <th>Tổng số lượng</th>
+                            <th>Giá cao nhất</th>
+                            <th>Giá thấp nhất</th>
+                            <th>Giá trung bình</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${items}">
+                            <td class="text-start ps-4 fw-bold text-dark" th:text="${item.group}"></td>
+                            <td class="fw-bold text-danger">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                            <td th:text="${item.count}"></td>
+                            <td class="fw-bold text-success">[[${#numbers.formatDecimal(item.max, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                            <td class="fw-bold text-warning">[[${#numbers.formatDecimal(item.min, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                            <td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.avg, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-striped table-hover align-middle text-center mb-0">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-start ps-4">Loại sản phẩm</th> 
-                        <th>Tổng doanh thu</th> 
-                        <th>Tổng số lượng</th>
-                        <th>Giá cao nhất</th>
-                        <th>Giá thấp nhất</th>
-                        <th>Giá trung bình</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="item : ${items}">
-                        <td class="text-start ps-4 fw-bold" th:text="${item.group}"></td>
-                        
-                        <td class="fw-bold text-danger">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                        
-                        <td th:text="${item.count}"></td>
-                        
-                        <td class="fw-bold text-success">[[${#numbers.formatDecimal(item.max, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                        
-                        <td class="fw-bold text-warning">[[${#numbers.formatDecimal(item.min, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                        
-                        <td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.avg, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                    </tr>
-                </tbody>
-            </table>
+
+    <div class="card mt-4 shadow-sm border-0 rounded-3">
+        <div class="card-body">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <canvas id="revenueChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
-<div style="width: 600px; margin: 20px auto;">
-    <canvas id="revenueChart"></canvas>
-</div>
 
 <script>
-    // Gọi API lấy dữ liệu thống kê
-    axios.get('/api/admin/report/revenue')
-        .then(response => {
-            const data = response.data;
-            
-            // Tách dữ liệu cho Chart.js
-            const labels = data.map(item => item.group);  // Tên danh mục
-            const revenues = data.map(item => item.sum);  // Doanh thu
-            
-            // Vẽ biểu đồ
-            new Chart(document.getElementById('revenueChart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Doanh thu theo danh mục',
-                        data: revenues,
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', 
-                            '#4BC0C0', '#9966FF', '#FF9F40'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'Thống kê doanh thu theo danh mục' }
+    // Sử dụng setTimeout để đợi thẻ <canvas> được nạp vào DOM của index.html
+    setTimeout(() => {
+        axios.get('/api/admin/report/revenue')
+            .then(response => {
+                const data = response.data;
+                const labels = data.map(item => item.group);
+                const revenues = data.map(item => item.sum);
+                
+                new Chart(document.getElementById('revenueChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenues,
+                            backgroundColor: [
+                                'rgba(25, 135, 84, 0.7)', // Màu xanh Success
+                                'rgba(13, 110, 253, 0.7)',
+                                'rgba(255, 193, 7, 0.7)',
+                                'rgba(220, 53, 69, 0.7)',
+                                'rgba(13, 202, 240, 0.7)'
+                            ],
+                            borderColor: '#198754',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'BIỂU ĐỒ DOANH THU THEO DANH MỤC', font: { size: 16 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
                     }
-                }
-            });
-        })
-        .catch(error => console.error('Lỗi:', error));
+                });
+            })
+            .catch(error => console.error('Lỗi load chart Revenue:', error));
+    }, 300);
 </script>
