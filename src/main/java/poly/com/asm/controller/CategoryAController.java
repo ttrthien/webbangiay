@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import jakarta.servlet.http.HttpServletRequest; // Import thêm cái này
 import poly.com.asm.entity.Category;
 import poly.com.asm.service.CategoryService;
 
@@ -16,18 +16,35 @@ public class CategoryAController {
 	@Autowired
 	CategoryService categoryService;
 
+	// Hàm phụ trợ kiểm tra AJAX
+	private boolean isAjax(HttpServletRequest request) {
+		return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+	}
+
 	@RequestMapping("/index")
-	public String index(Model model) {
+	public String index(Model model, HttpServletRequest request) {
 		model.addAttribute("item", new Category());
 		model.addAttribute("items", categoryService.findAll());
+		
+		// Nếu là AJAX: Trả về file con
+		if (isAjax(request)) {
+			return "admin/category"; 
+		}
+
 		model.addAttribute("view", "/admin/category.html");
 		return "layout/index";
 	}
 
 	@RequestMapping("/edit/{id}")
-	public String edit(@PathVariable("id") String id, Model model) {
+	public String edit(@PathVariable("id") String id, Model model, HttpServletRequest request) {
 		model.addAttribute("item", categoryService.findById(id));
 		model.addAttribute("items", categoryService.findAll());
+		
+		// Nếu là AJAX: Trả về file con
+		if (isAjax(request)) {
+			return "admin/category";
+		}
+
 		model.addAttribute("view", "/admin/category.html");
 		return "layout/index";
 	}
@@ -51,7 +68,8 @@ public class CategoryAController {
 			categoryService.update(item);
 			params.addFlashAttribute("message", "Cập nhật thành công!");
 		}
-		return "redirect:/admin/category/edit/" + item.getId();
+		// Redirect về index để nạp lại fragment
+		return "redirect:/admin/category/index";
 	}
 
 	@RequestMapping("/delete/{id}")

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import jakarta.servlet.http.HttpServletRequest; // Import quan trọng
 import poly.com.asm.entity.Order;
 import poly.com.asm.service.OrderService;
 
@@ -16,16 +16,34 @@ public class OrderAController {
     @Autowired
     OrderService orderService;
 
+    // Hàm phụ trợ kiểm tra request từ AJAX (Axios)
+    private boolean isAjax(HttpServletRequest request) {
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+    }
+
     @RequestMapping("/index")
-    public String index(Model model) {
+    public String index(Model model, HttpServletRequest request) {
         model.addAttribute("orders", orderService.findAll());
+        
+        // NẾU LÀ AJAX: Chỉ trả về file fragment admin/order.html
+        if (isAjax(request)) {
+            return "admin/order"; 
+        }
+
+        // NẾU KHÔNG (F5): Trả về layout tổng
         model.addAttribute("view", "admin/order.html");
         return "layout/index";
     }
 
     @RequestMapping("/detail/{id}")
-    public String detail(@PathVariable("id") Long id, Model model) {
+    public String detail(@PathVariable("id") Long id, Model model, HttpServletRequest request) {
         model.addAttribute("order", orderService.findById(id));
+        
+        // NẾU LÀ AJAX: Chỉ trả về file fragment admin/order-detail.html
+        if (isAjax(request)) {
+            return "admin/order-detail"; 
+        }
+
         model.addAttribute("view", "admin/order-detail.html");
         return "layout/index";
     }
@@ -37,7 +55,6 @@ public class OrderAController {
             Order order = orderService.findById(id);
             if (order != null) {
                 order.setStatus(status);
-                // Dùng update thay vì create để rõ nghĩa (hoặc save tùy service)
                 orderService.create(order); 
                 
                 String sttText = switch (status) {
@@ -53,6 +70,7 @@ public class OrderAController {
         } catch (Exception e) {
             params.addFlashAttribute("message", "Lỗi cập nhật trạng thái đơn hàng!");
         }
+        // Redirect sẽ quay lại hàm index bên trên, index sẽ tự xử lý trả về fragment hay layout
         return "redirect:/admin/order/index";
     }
 
