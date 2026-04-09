@@ -52,4 +52,6 @@ public class Product {
         inverseJoinColumns = @JoinColumn(name = "size_id")
     )
     private List<Size> sizes;
+    
+//    private String sizes;
 }

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("*")
+// @CrossOrigin("*")
 @RequestMapping("/api/orders") // Đổi gốc thành /api/orders để dùng chung cho cả User và Admin
 public class OrderRestController {
 
