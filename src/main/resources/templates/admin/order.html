@@ -1,14 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
 <div class="card shadow-sm border-0">
     <div class="card-header bg-warning text-dark fw-bold py-2 d-flex justify-content-between align-items-center">
         <span><i class="bi bi-cart-check-fill me-1"></i> QUẢN LÝ ĐƠN HÀNG</span>
-        <span class="badge bg-dark" th:text="${orders.size() + ' đơn hàng'}"></span>
+        <span class="badge bg-dark" id="orderCount">Đang tải...</span>
     </div>
     <div class="card-body">
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
-            <i class="bi bi-check-circle-fill me-1"></i> [[${message}]]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.7rem;"></button>
-        </div>
-
         <div class="table-responsive">
             <table class="table table-hover table-bordered align-middle">
                 <thead class="table-dark text-center">
@@ -21,59 +22,119 @@
                         <th style="width: 100px;">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="o : ${orders}">
-                        <td class="text-center fw-bold text-primary">#[[${o.id}]]</td>
-                        <td>
-                            <div class="fw-bold text-uppercase" style="font-size: 0.85rem;">[[${o.account.username}]]</div>
-                            <small class="text-muted d-block text-truncate" style="max-width: 300px;">
-                                <i class="bi bi-geo-alt"></i> [[${o.address}]]
-                            </small>
-                        </td>
-                        <td class="text-center small">[[${#dates.format(o.createDate, 'dd-MM-yyyy')}]]</td>
-                        
-                        <td class="text-center">
-                            <div th:switch="${o.status}">
-                                <span th:case="0" class="badge bg-secondary px-2">Chờ xử lý</span>
-                                <span th:case="1" class="badge bg-primary px-2">Xác nhận</span>
-                                <span th:case="2" class="badge bg-info text-dark px-2">Đang giao</span>
-                                <span th:case="3" class="badge bg-success px-2">Hoàn tất</span>
-                                <span th:case="4" class="badge bg-danger px-2">Đã hủy</span>
-                                <span th:case="*" class="badge bg-secondary px-2">Mới</span>
-                            </div>
-                        </td>
-
-                        <td class="text-center">
-                            <form th:action="@{/admin/order/update-status}" method="post" class="d-flex gap-1 justify-content-center">
-                                <input type="hidden" name="id" th:value="${o.id}">
-                                <select name="status" class="form-select form-select-sm border-dark shadow-sm" style="font-size: 0.75rem;">
-                                    <option value="0" th:selected="${o.status == 0}">Mới</option>
-                                    <option value="1" th:selected="${o.status == 1}">Xác nhận</option>
-                                    <option value="2" th:selected="${o.status == 2}">Đang giao</option>
-                                    <option value="3" th:selected="${o.status == 3}">Hoàn tất</option>
-                                    <option value="4" th:selected="${o.status == 4}">Hủy đơn</option>
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-dark">
-                                    <i class="bi bi-check2"></i>
-                                </button>
-                            </form>
-                        </td>
-
-                        <td class="text-center">
-                            <div class="btn-group">
-                                <a th:href="@{|/admin/order/detail/${o.id}|}" class="btn btn-sm btn-outline-info border-0" title="Chi tiết">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
-                                <a th:href="@{|/admin/order/delete/${o.id}|}" 
-                                   class="btn btn-sm btn-outline-danger border-0" 
-                                   onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn đơn hàng này và các chi tiết liên quan?')">
-                                    <i class="bi bi-trash3-fill"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+                <tbody id="orderTableBody">
+                    <tr><td colspan="6" class="text-center py-4">Đang tải dữ liệu đơn hàng...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<script>
+    const API_ORDERS = '/api/admin/orders';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadOrders();
+    });
+
+    // 1. Tải danh sách đơn hàng
+    function loadOrders() {
+        axios.get(API_ORDERS).then(res => {
+            const orders = res.data;
+            document.getElementById('orderCount').innerText = orders.length + ' đơn hàng';
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Chưa có đơn hàng nào.</td></tr>';
+                return;
+            }
+
+            orders.forEach(o => {
+                // Xử lý Ngày
+                const date = o.createDate ? new Date(o.createDate).toLocaleDateString('vi-VN') : 'N/A';
+                
+                // Xử lý Badge Trạng thái
+                let badge = '';
+                switch (o.status) {
+                    case 0: badge = '<span class="badge bg-secondary px-2">Chờ xử lý</span>'; break;
+                    case 1: badge = '<span class="badge bg-primary px-2">Xác nhận</span>'; break;
+                    case 2: badge = '<span class="badge bg-info text-dark px-2">Đang giao</span>'; break;
+                    case 3: badge = '<span class="badge bg-success px-2">Hoàn tất</span>'; break;
+                    case 4: badge = '<span class="badge bg-danger px-2">Đã hủy</span>'; break;
+                    default: badge = '<span class="badge bg-secondary px-2">Mới</span>';
+                }
+
+                const username = o.account ? o.account.username : 'N/A';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="text-center fw-bold text-primary">#${o.id}</td>
+                        <td>
+                            <div class="fw-bold text-uppercase" style="font-size: 0.85rem;">${username}</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 300px;">
+                                <i class="bi bi-geo-alt"></i> ${o.address || 'Không có địa chỉ'}
+                            </small>
+                        </td>
+                        <td class="text-center small">${date}</td>
+                        <td class="text-center" id="status-badge-${o.id}">${badge}</td>
+                        <td class="text-center">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <select id="select-status-${o.id}" class="form-select form-select-sm border-dark shadow-sm" style="font-size: 0.75rem;">
+                                    <option value="0" ${o.status === 0 ? 'selected' : ''}>Mới</option>
+                                    <option value="1" ${o.status === 1 ? 'selected' : ''}>Xác nhận</option>
+                                    <option value="2" ${o.status === 2 ? 'selected' : ''}>Đang giao</option>
+                                    <option value="3" ${o.status === 3 ? 'selected' : ''}>Hoàn tất</option>
+                                    <option value="4" ${o.status === 4 ? 'selected' : ''}>Hủy đơn</option>
+                                </select>
+                                <button type="button" class="btn btn-sm btn-dark" onclick="updateOrderStatus(${o.id})">
+                                    <i class="bi bi-check2"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button onclick="showPage('/admin/order/detail', ${o.id})" class="btn btn-sm btn-outline-info border-0" title="Chi tiết">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                                <button onclick="deleteOrder(${o.id})" class="btn btn-sm btn-outline-danger border-0" title="Xóa">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }).catch(err => {
+            console.error(err);
+            document.getElementById('orderTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu!</td></tr>';
+        });
+    }
+
+    // 2. Cập nhật trạng thái
+    function updateOrderStatus(id) {
+        const select = document.getElementById(`select-status-${id}`);
+        const newStatus = parseInt(select.value);
+
+        axios.put(`${API_ORDERS}/${id}/status`, { status: newStatus })
+            .then(res => {
+                alert(`Đã cập nhật trạng thái đơn hàng #${id}`);
+                loadOrders(); // Tải lại bảng để update badge
+            })
+            .catch(err => alert('Lỗi khi cập nhật trạng thái!'));
+    }
+
+    // 3. Xóa đơn hàng
+    function deleteOrder(id) {
+        if(confirm(`Bạn có chắc muốn xóa vĩnh viễn đơn hàng #${id} và các chi tiết liên quan?`)) {
+            axios.delete(`${API_ORDERS}/${id}`)
+                .then(() => {
+                    alert('Xóa đơn hàng thành công!');
+                    loadOrders();
+                })
+                .catch(err => alert('Lỗi: Không thể xóa đơn hàng này!'));
+        }
+    }
+</script>
+</body>
+</html>

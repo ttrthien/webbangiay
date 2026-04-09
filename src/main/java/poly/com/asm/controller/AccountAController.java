@@ -1,55 +1,23 @@
 package poly.com.asm.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import poly.com.asm.entity.Account;
-import poly.com.asm.service.AccountService;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin/account")
 public class AccountAController {
 
-	@Autowired
-	AccountService accountService;
-
-	@RequestMapping("/index")
-	public String index(Model model) {
-		model.addAttribute("items", accountService.findAll());
-		model.addAttribute("view", "admin/account.html");
-		return "layout/index";
-	}
-
-	@PostMapping("/update-role")
-	public String updateRole(@RequestParam("username") String username, @RequestParam("admin") boolean admin,
-			RedirectAttributes params) {
-		try {
-			Account acc = accountService.findById(username);
-			if (acc != null) {
-				acc.setAdmin(admin);
-				accountService.update(acc);
-
-				String role = admin ? "Quản trị viên" : "Khách hàng";
-				params.addFlashAttribute("message", "Cập nhật quyền thành công cho " + username + " thành " + role);
-			}
-		} catch (Exception e) {
-			params.addFlashAttribute("message", "Lỗi cập nhật quyền!");
-		}
-		return "redirect:/admin/account/index";
-	}
-
-	@RequestMapping("/delete/{username}")
-	public String delete(@PathVariable("username") String username, RedirectAttributes params) {
-		try {
-
-			accountService.delete(username);
-			params.addFlashAttribute("message", "Đã xóa thành công tài khoản: " + username);
-		} catch (Exception e) {
-			params.addFlashAttribute("message", "Không thể xóa tài khoản này vì đã có lịch sử đặt hàng!");
-		}
-		return "redirect:/admin/account/index";
-	}
+    @RequestMapping("/index")
+    public String index(Model model) {
+        // Không cần gọi accountService.findAll() ở đây nữa
+        // vì JS (Axios) trong file account.html sẽ tự động tải dữ liệu qua REST API.
+        
+        model.addAttribute("view", "admin/account.html");
+        return "layout/index";
+    }
+    
+    // ĐÃ XÓA: phương thức updateRole() và delete()
+    // Lý do: Các chức năng này hiện tại đã được xử lý bởi AccountRestController 
+    // (/api/admin/accounts) để đảm bảo trang không bị giật/reload khi bấm nút.
 }
