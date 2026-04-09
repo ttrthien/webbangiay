@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import poly.com.asm.entity.Account;
@@ -25,16 +26,28 @@ public class AccountController {
 	@Autowired
 	HttpSession session;
 
+	/**
+	 * Hàm kiểm tra xem Request có phải là AJAX (Single Page) không
+	 */
+	private boolean isAjax(HttpServletRequest request) {
+		return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+	}
+
 	@GetMapping("/account/sign-up")
-	public String signUp(Model model) {
+	public String signUp(Model model, HttpServletRequest request) {
 		model.addAttribute("item", new Account());
+		
+		if (isAjax(request)) {
+			return "account/sign-up"; // Trả về ruột cho AJAX
+		}
+		
 		model.addAttribute("view", "account/sign-up.html");
-		return "layout/index";
+		return "layout/index"; // Trả về cả layout cho F5/Link trực tiếp
 	}
 
 	@PostMapping("/account/sign-up")
-	public String signUp(Model model, @Valid @ModelAttribute("item") Account account, BindingResult result,
-			RedirectAttributes params) {
+	public String signUp(Model model, @Valid @ModelAttribute("item") Account account, 
+			BindingResult result, RedirectAttributes params) {
 		if (result.hasErrors()) {
 			model.addAttribute("view", "account/sign-up.html");
 			return "layout/index";
@@ -59,20 +72,25 @@ public class AccountController {
 	}
 
 	@RequestMapping("/account/edit-profile")
-	public String editProfile(Model model) {
+	public String editProfile(Model model, HttpServletRequest request) {
 		Account sessionUser = (Account) session.getAttribute("user");
 		if (sessionUser == null)
 			return "redirect:/auth/login";
 
 		Account user = accountService.findById(sessionUser.getUsername());
 		model.addAttribute("user", user);
+
+		if (isAjax(request)) {
+			return "account/edit-profile"; // Trả về ruột cho AJAX
+		}
+
 		model.addAttribute("view", "account/edit-profile.html");
 		return "layout/index";
 	}
 
 	@PostMapping("/account/edit-profile")
-	public String updateProfile(Model model, @Valid @ModelAttribute("user") Account formUser, BindingResult result,
-			RedirectAttributes params) {
+	public String updateProfile(Model model, @Valid @ModelAttribute("user") Account formUser, 
+			BindingResult result, RedirectAttributes params) {
 		Account sessionUser = (Account) session.getAttribute("user");
 		if (sessionUser == null)
 			return "redirect:/auth/login";
@@ -100,9 +118,14 @@ public class AccountController {
 	}
 
 	@GetMapping("/account/change-password")
-	public String changePasswordForm(Model model) {
+	public String changePasswordForm(Model model, HttpServletRequest request) {
 		if (session.getAttribute("user") == null)
 			return "redirect:/auth/login";
+		
+		if (isAjax(request)) {
+			return "account/change-password"; // Trả về ruột cho AJAX
+		}
+
 		model.addAttribute("view", "account/change-password.html");
 		return "layout/index";
 	}
@@ -134,7 +157,11 @@ public class AccountController {
 	}
 
 	@GetMapping("/account/forgot-password")
-	public String forgotPassword(Model model) {
+	public String forgotPassword(Model model, HttpServletRequest request) {
+		if (isAjax(request)) {
+			return "account/forgot-password"; // Trả về ruột cho AJAX
+		}
+		
 		model.addAttribute("view", "account/forgot-password.html");
 		return "layout/index";
 	}

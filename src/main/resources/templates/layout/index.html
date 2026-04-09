@@ -10,14 +10,15 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
-        body { background-color: #f8f9fa; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .sticky-sidebar { position: sticky; top: 100px; z-index: 900; }
         .banner-img { width: 100%; height: 180px; object-fit: cover; }
         .logo-img { height: 40px; margin-right: 10px; }
         .nav-link { font-weight: 500; transition: 0.3s; }
         .nav-link:hover { color: #ffc107 !important; }
-        #main-view { min-height: 600px; transition: opacity 0.2s; }
-        .loading-fade { opacity: 0.5; pointer-events: none; }
+        #main-view { min-height: 600px; transition: opacity 0.3s; }
+        .loading-fade { opacity: 0.4; pointer-events: none; }
+        .dropdown-menu { border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -37,15 +38,24 @@
                         <a class="nav-link dropdown-toggle text-info" href="#" data-bs-toggle="dropdown" style="font-size: 0.85rem;">
                             <i class="bi bi-box-seam me-1"></i> Quản lý
                         </a>
-                        <ul class="dropdown-menu shadow mt-2">
-                            <li><a class="dropdown-item small" th:href="@{/admin/product/index}">Sản phẩm</a></li>
-                            <li><a class="dropdown-item small" th:href="@{/admin/category/index}">Danh mục</a></li>
+                        <ul class="dropdown-menu mt-2">
+                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="showPage('/admin/product/index')">Sản phẩm</a></li>
+                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="showPage('/admin/category/index')">Danh mục</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-info" th:href="@{/admin/order/index}" style="font-size: 0.85rem;">
+                        <a class="nav-link text-info" href="javascript:void(0)" onclick="showPage('/admin/order/index')" style="font-size: 0.85rem;">
                             <i class="bi bi-cart-check me-1"></i> Đơn hàng
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-warning" href="#" data-bs-toggle="dropdown" style="font-size: 0.85rem;">
+                            <i class="bi bi-graph-up-arrow me-1"></i> Thống kê
+                        </a>
+                        <ul class="dropdown-menu mt-2">
+                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="showPage('/admin/report/revenue')">Doanh thu theo loại</a></li>
+                            <li><a class="dropdown-item small" href="javascript:void(0)" onclick="showPage('/admin/report/vip')">Khách hàng VIP</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -53,7 +63,7 @@
             <div class="collapse navbar-collapse" id="navbarScroll">
                 <ul class="navbar-nav ms-auto align-items-center gap-3">
                     <li class="nav-item me-2">
-                        <a class="nav-link position-relative" th:href="@{/cart/view}">
+                        <a class="nav-link position-relative" href="javascript:void(0)" onclick="showPage('/cart/view')">
                             <i class="bi bi-cart3 fs-5"></i>
                             <span id="cart-badge" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" 
                                   style="font-size: 0.65rem;" th:text="${session.cart != null ? session.cart.count : 0}">0</span>
@@ -71,8 +81,8 @@
                                 <i class="bi bi-person-circle me-1"></i> [[${session.user.fullname}]]
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow mt-2">
-                                <li><a class="dropdown-item" th:href="@{/account/edit-profile}">Hồ sơ</a></li>
-                                <li><a class="dropdown-item" th:href="@{/order/list}">Đơn hàng</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="showPage('/account/edit-profile')">Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="showPage('/order/list')">Đơn hàng</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" th:href="@{/auth/logoff}">Đăng xuất</a></li>
                             </ul>
@@ -105,63 +115,66 @@
         axios.defaults.withCredentials = true;
 
         /**
-         * Hàm điều hướng Single Page
+         * Hàm điều hướng Single Page (SPA)
+         * Thiện dùng hàm này cho tất cả các thẻ <a> quản trị
          */
         async function showPage(url, id) {
             const fullUrl = url + (id ? '/' + id : '');
-            if (id) window.currentProductId = id;
-            
-            window.history.pushState({ path: fullUrl, pid: id }, '', fullUrl);
+            // Đổi URL trên trình duyệt nhưng không load lại trang
+            window.history.pushState({ path: fullUrl }, '', fullUrl);
             await renderContent(fullUrl);
         }
 
         /**
-         * Hàm nạp nội dung fragment
+         * Hàm nạp nội dung fragment từ Server
          */
         async function renderContent(url) {
             const view = document.getElementById('main-view');
             view.classList.add('loading-fade');
 
             try {
+                // Gửi request kèm header để Controller nhận biết là AJAX
                 const response = await axios.get(url, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
                 
+                // Cập nhật nội dung vào vùng main-view
                 view.innerHTML = response.data;
 
-                // Ép chạy lại script trong trang con
+                // QUAN TRỌNG: Tìm và thực thi lại các script trong fragment (như Chart của Huy)
                 const scripts = view.querySelectorAll('script');
                 scripts.forEach(oldScript => {
                     const newScript = document.createElement('script');
-                    newScript.text = oldScript.text;
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.text = oldScript.text;
+                    }
                     document.head.appendChild(newScript).parentNode.removeChild(newScript);
                 });
                 
                 window.scrollTo(0, 0);
             } catch (err) {
-                console.error("Lỗi nạp nội dung:", err);
+                console.error("Lỗi nạp nội dung SPA:", err);
+                // Nếu lỗi AJAX, thử load trang theo cách truyền thống
                 if(!url.includes('api')) window.location.href = url;
             } finally {
                 view.classList.remove('loading-fade');
             }
         }
 
-        /**
-         * Xử lý nút Back của trình duyệt
-         */
-        window.onpopstate = function(event) {
-            const url = window.location.pathname;
-            if(event.state && event.state.pid) {
-                window.currentProductId = event.state.pid;
-            }
-            renderContent(url);
+        // Xử lý nút Back/Forward của trình duyệt
+        window.onpopstate = function() {
+            renderContent(window.location.pathname);
         };
 
+        // Cập nhật giỏ hàng realtime
         function updateCartBadge(count) {
             const badge = document.getElementById("cart-badge");
             if (badge) badge.innerText = count;
         }
 
+        // Hiển thị thông báo từ Server (Thymeleaf Flash Attributes)
         var serverMsg = /*[[${message}]]*/ "";
         if (serverMsg) {
             Swal.fire({ icon: 'info', title: 'Thông báo', text: serverMsg, timer: 2000 });

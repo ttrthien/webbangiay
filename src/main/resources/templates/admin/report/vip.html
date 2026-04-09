@@ -1,50 +1,66 @@
-<div class="card shadow-sm">
-	<div class="card-header bg-warning text-dark fw-bold">TOP 10
-		KHÁCH HÀNG VIP</div>
-	<div class="card-body">
-		<table class="table table-hover">
-			<thead>
-				<tr>
-					<th>Họ và tên</th>
-					<th>Tổng chi tiêu</th>
-					<th>Số đơn hàng</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="item : ${items}">
-					<td th:text="${item.group}"></td>
-					<td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.sum,
-						0, 'COMMA', 0, 'POINT')}]] ₫</td>
-					<td th:text="${item.count}"></td>
-				</tr>
-			</tbody>
-		</table>
-		<div style="width: 400px; margin: 20px auto;">
-			<canvas id="vipChart"></canvas>
-		</div>
+<div class="container-fluid p-0">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-warning text-dark fw-bold py-3 text-uppercase d-flex align-items-center">
+            <i class="bi bi-star-fill me-2 fs-4"></i> Top 10 khách hàng VIP
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start ps-4">Họ và tên</th>
+                            <th>Tổng chi tiêu</th>
+                            <th>Số lượng đơn hàng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${items}">
+                            <td class="text-start ps-4 fw-bold" th:text="${item.group}"></td>
+                            <td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
+                            <td th:text="${item.count}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-		<script>
-    axios.get('/api/admin/report/vip')
-        .then(response => {
-            const data = response.data;
-            new Chart(document.getElementById('vipChart'), {
-                type: 'pie',
-                data: {
-                    labels: data.map(item => item.group),
-                    datasets: [{
-                        data: data.map(item => item.sum),
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FFCE56']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: { display: true, text: 'Top 10 Khách hàng VIP' }
-                    }
-                }
-            });
-        })
-        .catch(error => console.error('Lỗi:', error));
-</script>
-	</div>
+    <div class="card mt-4 shadow-sm border-0 rounded-3">
+        <div class="card-body">
+            <div style="max-width: 500px; margin: 0 auto;">
+                <canvas id="vipChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    setTimeout(() => {
+        axios.get('/api/admin/report/vip')
+            .then(response => {
+                const data = response.data;
+                new Chart(document.getElementById('vipChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: data.map(item => item.group),
+                        datasets: [{
+                            data: data.map(item => item.sum),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', 
+                                '#4BC0C0', '#9966FF', '#FF9F40', 
+                                '#C9CBCF', '#20c997', '#fd7e14', '#6610f2'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: { display: true, text: 'TỶ LỆ CHI TIÊU KHÁCH HÀNG VIP', font: { size: 16 } },
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Lỗi load chart VIP:', error));
+    }, 300);
+</script>
