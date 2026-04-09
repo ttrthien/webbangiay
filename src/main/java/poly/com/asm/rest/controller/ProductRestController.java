@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import poly.com.asm.dao.ProductDAO;
 import poly.com.asm.entity.Product;
 
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/products")
 public class ProductRestController {

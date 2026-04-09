@@ -10,7 +10,7 @@ import poly.com.asm.model.LoginRequest;
 import java.util.Map;
 import java.util.HashMap;
 
-@CrossOrigin("*") 
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthRestController {

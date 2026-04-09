@@ -2,9 +2,8 @@ package poly.com.asm.entity;
 
 import java.util.Date;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -39,6 +38,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "Categoryid")
+    @JsonIgnoreProperties("products") // Ngăn vòng lặp từ Category
     private Category category;
 
     @JsonIgnore
@@ -51,5 +51,6 @@ public class Product {
         joinColumns = @JoinColumn(name = "product_id"),
         inverseJoinColumns = @JoinColumn(name = "size_id")
     )
+    @JsonIgnoreProperties("products") // Ngăn vòng lặp từ Size
     private List<Size> sizes;
 }
