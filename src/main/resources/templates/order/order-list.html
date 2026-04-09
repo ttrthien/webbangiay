@@ -9,7 +9,7 @@
         <div class="card shadow border-0">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
                 <h4 class="mb-0"><i class="bi bi-card-list me-2"></i>LỊCH SỬ ĐẶT HÀNG</h4>
-                <span class="badge bg-white text-primary fw-bold" th:text="${orders.size()} + ' đơn hàng'">0 đơn hàng</span>
+                <span id="order-count-badge" class="badge bg-white text-primary fw-bold">0 đơn hàng</span>
             </div>
 
             <div class="card-body p-0">
@@ -25,43 +25,63 @@
                                 <th class="text-center">Hành động</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr th:each="order : ${orders}" class="align-middle">
-                                <td class="text-center fw-bold" th:text="${order.id}"></td>
-                                <td th:text="${#dates.format(order.createDate,'dd-MM-yyyy HH:mm')}"></td>
-                                <td th:text="${order.address}" class="small"></td>
-
-                                <td class="text-center">
-                                    <span th:if="${order.status == 0}" class="badge bg-warning text-dark">Chờ thanh toán</span>
-                                    <span th:if="${order.status >= 1}" class="badge bg-success">Đã thanh toán</span>
-                                </td>
-
-                                <td class="text-center">
-                                    <span th:if="${order.status == 0}" class="badge bg-secondary">Đang xử lý</span>
-                                    <span th:if="${order.status == 1}" class="badge bg-warning text-dark">Chuẩn bị giao</span>
-                                    <span th:if="${order.status == 2}" class="badge bg-info">Đang giao</span>
-                                    <span th:if="${order.status == 3}" class="badge bg-success">Đã giao hàng</span>
-                                </td>
-
-                                <td class="text-center">
-                                    <button th:onclick="'showPage(\'/order/detail\', ' + ${order.id} + ')'" 
-                                            class="btn btn-sm btn-info fw-bold text-white px-3 shadow-sm">
-                                        Xem chi tiết
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr th:if="${#lists.isEmpty(orders)}">
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <p class="mb-2">Bạn chưa có đơn hàng nào.</p>
-                                    <button onclick="showPage('/home/index')" class="btn btn-primary btn-sm px-4">Mua sắm ngay!</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="order-list-rows">
+                            </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        (async function initOrderList() {
+            try {
+                // Gọi API lấy danh sách đơn hàng (Tân đã viết ở OrderRestController)
+                const res = await axios.get('/api/orders/admin/all');
+                const orders = res.data;
+                
+                document.getElementById('order-count-badge').innerText = orders.length + ' đơn hàng';
+                
+                let html = '';
+                if (orders.length === 0) {
+                    html = `<tr><td colspan="6" class="text-center py-5 text-muted">Bạn chưa có đơn hàng nào.</td></tr>`;
+                } else {
+                    orders.forEach(order => {
+                        html += `
+                        <tr class="align-middle">
+                            <td class="text-center fw-bold">${order.id}</td>
+                            <td>${new Date(order.createDate).toLocaleString('vi-VN')}</td>
+                            <td class="small">${order.address}</td>
+                            <td class="text-center">
+                                ${order.status === 0 
+                                    ? '<span class="badge bg-warning text-dark">Chờ thanh toán</span>' 
+                                    : '<span class="badge bg-success">Đã thanh toán</span>'}
+                            </td>
+                            <td class="text-center">${getStatusBadge(order.status)}</td>
+                            <td class="text-center">
+                                <button onclick="showPage('/order/detail', ${order.id})" 
+                                        class="btn btn-sm btn-info fw-bold text-white px-3 shadow-sm">
+                                    Xem chi tiết
+                                </button>
+                            </td>
+                        </tr>`;
+                    });
+                }
+                document.getElementById('order-list-rows').innerHTML = html;
+            } catch (error) {
+                console.error("Lỗi tải danh sách đơn hàng:", error);
+            }
+        })();
+
+        function getStatusBadge(status) {
+            const badges = {
+                0: '<span class="badge bg-secondary">Đang xử lý</span>',
+                1: '<span class="badge bg-warning text-dark">Chuẩn bị giao</span>',
+                2: '<span class="badge bg-info">Đang giao</span>',
+                3: '<span class="badge bg-success">Đã giao hàng</span>'
+            };
+            return badges[status] || '';
+        }
+    </script>
 </body>
 </html>

@@ -1,12 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả thanh toán</title>
+</head>
 <body class="container mt-5 text-center">
-    <div th:if="${result == 'success'}" class="alert alert-success">
-        <h2>Thanh toán thành công!</h2>
+    <div id="payment-success" class="alert alert-success d-none shadow-sm">
+        <h2 class="fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Thanh toán thành công!</h2>
+        <p>Cảm ơn Tân đã tin tưởng lựa chọn Camedo Shop.</p>
     </div>
-    <div th:if="${result == 'failed'}" class="alert alert-danger">
-        <h2>Thanh toán thất bại!</h2>
+
+    <div id="payment-failed" class="alert alert-danger d-none shadow-sm">
+        <h2 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Thanh toán thất bại!</h2>
+        <p>Có lỗi xảy ra trong quá trình giao dịch. Vui lòng thử lại sau.</p>
     </div>
-    <a href="/order/list" class="btn btn-primary">Xem đơn hàng</a>
+
+    <div class="mt-4">
+        <button onclick="showPage('/order/list')" class="btn btn-primary px-4 fw-bold">
+            Xem lịch sử đơn hàng
+        </button>
+        <button onclick="showPage('/home/index')" class="btn btn-outline-secondary px-4 ms-2">
+            Quay lại trang chủ
+        </button>
+    </div>
+
+    <script>
+        (function checkPaymentResult() {
+            // 1. Lấy kết quả từ URL (Ví dụ: /payment-result?status=success)
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get('status'); 
+
+            // 2. Hiển thị thông báo tương ứng bằng cách xóa class 'd-none' của Bootstrap
+            if (status === 'success') {
+                document.getElementById('payment-success').classList.remove('d-none');
+            } else {
+                document.getElementById('payment-failed').classList.remove('d-none');
+            }
+            
+            // 3. Xóa giỏ hàng nếu thành công (Tân có thể gọi thêm API clear giỏ hàng ở đây cho chắc)
+            if (status === 'success') {
+                axios.get('/api/cart/clear').catch(err => console.error(err));
+            }
+        })();
+    </script>
 </body>
 </html>

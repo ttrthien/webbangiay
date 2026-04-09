@@ -9,24 +9,19 @@
         <div class="card shadow border-0">
             <div class="card-header bg-info text-white py-3">
                 <h4 class="mb-0">
-                    <i class="bi bi-info-circle-fill me-2"></i>CHI TIẾT ĐƠN HÀNG #<span th:text="${order.id}"></span>
+                    <i class="bi bi-info-circle-fill me-2"></i>CHI TIẾT ĐƠN HÀNG #<span id="det-order-id"></span>
                 </h4>
             </div>
             <div class="card-body">
                 <div class="row mb-4">
                     <div class="col-sm-6 border-end">
-                        <p class="mb-1"><strong>Người đặt:</strong> <span th:text="${order.account.fullname}"></span></p>
-                        <p class="mb-1"><strong>Ngày đặt:</strong> <span th:text="${#dates.format(order.createDate, 'dd-MM-yyyy HH:mm')}"></span></p>
-                        <p class="mb-0"><strong>Phương thức:</strong> <span th:text="${order.paymentMethod}" class="badge bg-light text-dark border"></span></p>
+                        <p class="mb-1"><strong>Người đặt:</strong> <span id="det-fullname"></span></p>
+                        <p class="mb-1"><strong>Ngày đặt:</strong> <span id="det-date"></span></p>
+                        <p class="mb-0"><strong>Phương thức:</strong> <span id="det-method" class="badge bg-light text-dark border"></span></p>
                     </div>
                     <div class="col-sm-6 ps-md-4">
-                        <p class="mb-1"><strong>Địa chỉ giao:</strong> <span th:text="${order.address}"></span></p>
-                        <p class="mb-0"><strong>Trạng thái:</strong> 
-                            <span th:if="${order.status == 0}" class="badge bg-warning text-dark">Chờ thanh toán</span>
-                            <span th:if="${order.status == 1}" class="badge bg-success">Đã thanh toán/Xác nhận</span>
-                            <span th:if="${order.status == 2}" class="badge bg-info text-white">Đang giao hàng</span>
-                            <span th:if="${order.status == 3}" class="badge bg-primary">Hoàn thành</span>
-                        </p>
+                        <p class="mb-1"><strong>Địa chỉ giao:</strong> <span id="det-address"></span></p>
+                        <p class="mb-0"><strong>Trạng thái:</strong> <span id="det-status-badge"></span></p>
                     </div>
                 </div>
 
@@ -43,26 +38,8 @@
                                 <th>Thành tiền</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr th:each="detail, state : ${order.orderDetails}">
-                                <td class="text-center" th:text="${state.index + 1}"></td>
-                                <td class="text-center">
-                                    <img th:src="@{/images/{img}(img=${detail.product.image})}" 
-                                         width="60" class="rounded shadow-sm" onerror="this.src='/images/default.png'">
-                                </td>
-                                <td th:text="${detail.product.name}" class="fw-bold text-dark"></td>
-                                <td class="text-center"><span class="badge bg-secondary" th:text="${detail.size}"></span></td>
-                                <td class="text-end" th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-                                <td class="text-center" th:text="${detail.quantity}"></td>
-                                <td class="text-end text-danger fw-bold" th:text="${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
-                            </tr>
-                            <tr th:if="${#lists.isEmpty(order.orderDetails)}">
-                                <td colspan="7" class="text-center py-5 text-muted">
-                                    <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
-                                    Không có dữ liệu sản phẩm cho đơn hàng này.
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="det-items-body">
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -73,12 +50,62 @@
 
                 <div class="h5 mb-0">
                     <strong>TỔNG CỘNG: </strong>
-                    <span class="text-danger fw-bold" 
-                          th:text="${order.orderDetails != null and !#lists.isEmpty(order.orderDetails) ? #numbers.formatDecimal(#aggregates.sum(order.orderDetails.![price * quantity]), 0, 'COMMA', 0, 'POINT') : '0'} + ' ₫'">
-                    </span>
+                    <span id="det-total-amount" class="text-danger fw-bold">0 ₫</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        (async function loadOrderDetail() {
+            // Lấy ID từ window (do hàm showPage lưu lại)
+            const orderId = window.currentOrderId; 
+            if(!orderId) return;
+
+            try {
+                // Gọi API lấy chi tiết đơn hàng (Nhớ thêm hàm này vào Java Controller)
+                const res = await axios.get(`/api/orders/${orderId}`);
+                const order = res.data;
+
+                // 1. Thông tin header
+                document.getElementById('det-order-id').innerText = order.id;
+                document.getElementById('det-fullname').innerText = order.account.fullname;
+                document.getElementById('det-date').innerText = new Date(order.createDate).toLocaleString('vi-VN');
+                document.getElementById('det-method').innerText = order.paymentMethod;
+                document.getElementById('det-address').innerText = order.address;
+
+                // 2. Trạng thái
+                const statusClasses = ['bg-warning text-dark', 'bg-success', 'bg-info text-white', 'bg-primary'];
+                const statusTexts = ['Chờ thanh toán', 'Đã thanh toán/Xác nhận', 'Đang giao hàng', 'Hoàn thành'];
+                document.getElementById('det-status-badge').innerHTML = 
+                    `<span class="badge ${statusClasses[order.status]}">${statusTexts[order.status]}</span>`;
+
+                // 3. Danh sách sản phẩm
+                let html = '';
+                let total = 0;
+                order.orderDetails.forEach((d, index) => {
+                    const subtotal = d.price * d.quantity;
+                    total += subtotal;
+                    html += `
+                        <tr>
+                            <td class="text-center">${index + 1}</td>
+                            <td class="text-center">
+                                <img src="/images/${d.product.image}" width="60" class="rounded shadow-sm" onerror="this.src='/images/default.png'">
+                            </td>
+                            <td class="fw-bold text-dark">${d.product.name}</td>
+                            <td class="text-center"><span class="badge bg-secondary">${d.size}</span></td>
+                            <td class="text-end">${d.price.toLocaleString('vi-VN')} ₫</td>
+                            <td class="text-center">${d.quantity}</td>
+                            <td class="text-end text-danger fw-bold">${subtotal.toLocaleString('vi-VN')} ₫</td>
+                        </tr>`;
+                });
+                document.getElementById('det-items-body').innerHTML = html;
+                document.getElementById('det-total-amount').innerText = total.toLocaleString('vi-VN') + ' ₫';
+
+            } catch (error) {
+                console.error("Lỗi tải chi tiết đơn hàng:", error);
+            }
+        })();
+    </script>
 </body>
 </html>

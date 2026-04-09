@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Xác nhận đơn hàng</title>
-    </head>
+</head>
 <body>
     <div class="container mt-4 mb-5">
         <h2 class="text-primary mb-4 text-center fw-bold">XÁC NHẬN ĐƠN HÀNG</h2>
@@ -17,29 +17,26 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Người mua:</label> 
-                            <input type="text" id="fullname" 
-                                   th:value="${session.user.fullname}" 
-                                   class="form-control bg-light fw-bold" readonly>
+                            <input type="text" th:value="${session.user.fullname}" class="form-control bg-light fw-bold" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Ngày đặt:</label> 
-                            <input type="text" id="orderDate" class="form-control bg-white" readonly>
+                            <input type="text" id="chk-order-date" class="form-control bg-white" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Địa chỉ giao hàng:</label>
-                            <textarea id="address" class="form-control border-primary" rows="3"
-                                placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."></textarea>
-                            <div id="address-error" class="text-danger small mt-1 d-none">Vui lòng nhập địa chỉ nhận hàng!</div>
+                            <textarea id="chk-address" class="form-control border-primary" rows="3" placeholder="Nhập địa chỉ nhận hàng..."></textarea>
+                            <div id="chk-address-error" class="text-danger small mt-1 d-none">Vui lòng nhập địa chỉ!</div>
                         </div>
                         <div class="mt-4 border p-3 rounded bg-light">
                             <label class="form-label fw-bold d-block mb-2">Phương thức thanh toán:</label>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked> 
-                                <label class="form-check-label" for="cod">Tiền mặt (COD)</label>
+                                <input class="form-check-input" type="radio" name="payMethod" id="chk-cod" value="COD" checked> 
+                                <label class="form-check-label" for="chk-cod">Tiền mặt (COD)</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="vnpay" value="VNPAY"> 
-                                <label class="form-check-label" for="vnpay">Online (VNPay)</label>
+                                <input class="form-check-input" type="radio" name="payMethod" id="chk-vnpay" value="VNPAY"> 
+                                <label class="form-check-label" for="chk-vnpay">Online (VNPay)</label>
                             </div>
                         </div>
                     </div>
@@ -62,22 +59,20 @@
                                         <th class="text-end pe-3">Tổng</th>
                                     </tr>
                                 </thead>
-                                <tbody id="cart-items">
+                                <tbody id="chk-cart-body">
                                     </tbody>
                                 <tfoot>
                                     <tr class="table-warning">
                                         <td colspan="3" class="text-end fw-bold py-3">TỔNG THANH TOÁN:</td>
-                                        <td class="text-end fw-bold text-danger h5 py-3 pe-3" id="total-amount">0 ₫</td>
+                                        <td id="chk-total-amount" class="text-end fw-bold text-danger h5 py-3 pe-3">0 ₫</td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
                     <div class="card-footer bg-white border-top-0 d-flex justify-content-between py-3">
-                        <button type="button" onclick="showPage('/cart/view')" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Sửa giỏ hàng
-                        </button>
-                        <button type="button" id="btn-confirm" onclick="confirmOrder()" class="btn btn-success px-5 fw-bold shadow">
+                        <button onclick="showPage('/cart/view')" class="btn btn-outline-secondary">Sửa giỏ hàng</button>
+                        <button id="chk-btn-confirm" onclick="confirmCheckout()" class="btn btn-success px-5 fw-bold shadow">
                             XÁC NHẬN ĐẶT HÀNG
                         </button>
                     </div>
@@ -87,83 +82,57 @@
     </div>
 
     <script>
-        /**
-         * 1. KHỞI TẠO DỮ LIỆU
-         */
+        // 1. Tải giỏ hàng khi mở trang
         (async function initCheckout() {
-            // Hiển thị ngày hiện tại
-            document.getElementById('orderDate').value = new Date().toLocaleDateString('vi-VN');
-            
+            document.getElementById('chk-order-date').value = new Date().toLocaleDateString('vi-VN');
             try {
-                // Gọi API lấy giỏ hàng (đã cấu hình withCredentials ở index.html)
                 const res = await axios.get('/api/cart');
                 const { items, amount } = res.data;
-
-                if (!items || items.length === 0) {
-                    Swal.fire('Giỏ hàng trống', 'Vui lòng chọn sản phẩm trước!', 'warning');
-                    showPage('/home/index');
-                    return;
-                }
                 
-                // Đổ sản phẩm vào bảng
                 let html = '';
                 items.forEach(item => {
                     html += `
-                        <tr class="align-middle">
-                            <td class="ps-3">
-                                <div class="fw-bold text-dark">${item.name}</div>
-                                <small class="badge bg-secondary">Size: ${item.size}</small>
-                            </td>
-                            <td class="text-center">${item.qty}</td>
-                            <td class="text-end">${item.price.toLocaleString('vi-VN')} ₫</td>
-                            <td class="text-end fw-bold text-danger pe-3">${(item.price * item.qty).toLocaleString('vi-VN')} ₫</td>
-                        </tr>`;
+                    <tr class="align-middle">
+                        <td class="ps-3">
+                            <div class="fw-bold text-dark">${item.name}</div>
+                            <small class="badge bg-secondary">Size: ${item.size}</small>
+                        </td>
+                        <td class="text-center">${item.qty}</td>
+                        <td class="text-end">${item.price.toLocaleString('vi-VN')} ₫</td>
+                        <td class="text-end fw-bold text-danger pe-3">${(item.price * item.qty).toLocaleString('vi-VN')} ₫</td>
+                    </tr>`;
                 });
-                document.getElementById('cart-items').innerHTML = html;
-                document.getElementById('total-amount').innerText = amount.toLocaleString('vi-VN') + ' ₫';
-
-            } catch (error) {
-                console.error("Lỗi checkout:", error);
-                if (error.response?.status === 401) {
-                    window.location.href = "/auth/login";
-                }
-            }
+                document.getElementById('chk-cart-body').innerHTML = html;
+                document.getElementById('chk-total-amount').innerText = amount.toLocaleString('vi-VN') + ' ₫';
+            } catch (err) { console.error(err); }
         })();
 
-        /**
-         * 2. XÁC NHẬN ĐẶT HÀNG
-         */
-        async function confirmOrder() {
-            const address = document.getElementById('address').value.trim();
-            const method = document.querySelector('input[name="paymentMethod"]:checked').value;
-            const err = document.getElementById('address-error');
-
+        // 2. Gửi đơn hàng lên Server
+        async function confirmCheckout() {
+            const address = document.getElementById('chk-address').value.trim();
+            const method = document.querySelector('input[name="payMethod"]:checked').value;
+            
             if(!address) {
-                err.classList.remove('d-none');
-                document.getElementById('address').focus();
+                document.getElementById('chk-address-error').classList.remove('d-none');
                 return;
             }
-            err.classList.add('d-none');
 
-            const btn = document.getElementById('btn-confirm');
+            const btn = document.getElementById('chk-btn-confirm');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+            btn.innerHTML = 'Đang xử lý...';
 
             try {
-                const orderBody = { address: address, paymentMethod: method };
-                const res = await axios.post('/api/orders/checkout', orderBody);
-                
+                const res = await axios.post('/api/orders/checkout', { address, paymentMethod: method });
                 if(res.data.success) {
                     if(method === 'VNPAY' && res.data.vnpayUrl) {
-                        window.location.href = res.data.vnpayUrl;
+                        location.href = res.data.vnpayUrl;
                     } else {
-                        await Swal.fire('Thành công', 'Đơn hàng của bạn đã được ghi nhận!', 'success');
-                        window.location.href = "/order/list"; 
+                        await Swal.fire('Thành công', 'Đơn hàng đã được ghi nhận!', 'success');
+                        showPage('/order/list');
                     }
                 }
-            } catch (error) {
-                const msg = error.response?.data?.message || "Lỗi kết nối Server!";
-                Swal.fire('Lỗi đặt hàng', msg, 'error');
+            } catch (err) {
+                Swal.fire('Lỗi', err.response?.data?.message || "Lỗi hệ thống", 'error');
                 btn.disabled = false;
                 btn.innerHTML = 'XÁC NHẬN ĐẶT HÀNG';
             }
