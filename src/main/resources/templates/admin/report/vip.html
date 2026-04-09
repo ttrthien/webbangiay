@@ -1,19 +1,50 @@
 <div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark fw-bold">TOP 10 KHÁCH HÀNG VIP</div>
-    <div class="card-body">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Họ và tên</th> <th>Tổng chi tiêu</th> <th>Số đơn hàng</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${items}">
-                    <td th:text="${item.group}"></td>
-                    <td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.sum, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                    <td th:text="${item.count}"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+	<div class="card-header bg-warning text-dark fw-bold">TOP 10
+		KHÁCH HÀNG VIP</div>
+	<div class="card-body">
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Họ và tên</th>
+					<th>Tổng chi tiêu</th>
+					<th>Số đơn hàng</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="item : ${items}">
+					<td th:text="${item.group}"></td>
+					<td class="fw-bold text-primary">[[${#numbers.formatDecimal(item.sum,
+						0, 'COMMA', 0, 'POINT')}]] ₫</td>
+					<td th:text="${item.count}"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div style="width: 400px; margin: 20px auto;">
+			<canvas id="vipChart"></canvas>
+		</div>
+
+		<script>
+    axios.get('/api/admin/report/vip')
+        .then(response => {
+            const data = response.data;
+            new Chart(document.getElementById('vipChart'), {
+                type: 'pie',
+                data: {
+                    labels: data.map(item => item.group),
+                    datasets: [{
+                        data: data.map(item => item.sum),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Top 10 Khách hàng VIP' }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Lỗi:', error));
+</script>
+	</div>
 </div>
