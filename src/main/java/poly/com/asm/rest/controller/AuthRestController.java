@@ -110,4 +110,20 @@ public class AuthRestController {
             return ResponseEntity.status(500).body(response);
         }
     }
+    
+    @PutMapping("/profile/update")
+    public ResponseEntity<?> updateProfile(@RequestBody Account data) {
+        Account sessionUser = (Account) session.getAttribute("user");
+        if (sessionUser == null) return ResponseEntity.status(401).build();
+
+        Account currentUser = accountDao.findById(sessionUser.getUsername()).get();
+        
+        currentUser.setFullname(data.getFullname());
+        currentUser.setEmail(data.getEmail());
+        
+        accountDao.save(currentUser);
+        session.setAttribute("user", currentUser);
+        
+        return ResponseEntity.ok("{\"success\": true, \"message\": \"Cập nhật thành công!\"}");
+    }
 }
