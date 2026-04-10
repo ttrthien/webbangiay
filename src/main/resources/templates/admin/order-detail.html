@@ -1,16 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
 <div class="card shadow-sm border-0">
-    <div class="card-header bg-info text-white fw-bold py-2">
-        <i class="bi bi-info-circle-fill me-1"></i> CHI TIẾT ĐƠN HÀNG #[[${order.id}]]
+    <div class="card-header bg-info text-white fw-bold py-2" id="detailHeader">
+        <i class="bi bi-info-circle-fill me-1"></i> CHI TIẾT ĐƠN HÀNG ĐANG TẢI...
     </div>
     <div class="card-body">
         <div class="row mb-4">
             <div class="col-sm-6">
-                <p class="mb-1"><strong>Khách hàng:</strong> [[${order.account.fullname}]] (@[[${order.account.username}]])</p>
-                <p class="mb-1"><strong>Ngày đặt:</strong> [[${#dates.format(order.createDate, 'dd-MM-yyyy HH:mm')}]]</p>
+                <p class="mb-1"><strong>Khách hàng:</strong> <span id="dtCustomer">...</span></p>
+                <p class="mb-1"><strong>Ngày đặt:</strong> <span id="dtDate">...</span></p>
             </div>
             <div class="col-sm-6 text-md-end">
-                <p class="mb-1"><strong>Địa chỉ giao hàng:</strong> [[${order.address}]]</p>
-                <p class="mb-1"><strong>Phương thức:</strong> <span class="badge bg-light text-dark border">[[${order.paymentMethod}]]</span></p>
+                <p class="mb-1"><strong>Địa chỉ giao hàng:</strong> <span id="dtAddress">...</span></p>
+                <p class="mb-1"><strong>Phương thức:</strong> <span id="dtPayment" class="badge bg-light text-dark border">...</span></p>
             </div>
         </div>
 
@@ -25,36 +31,92 @@
                         <th>Thành tiền</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="detail, state : ${order.orderDetails}">
-                        <td class="text-center" th:text="${state.index + 1}"></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <img th:src="@{|/images/${detail.product.image}|}" class="rounded border me-2" style="width: 35px; height: 35px; object-fit: cover;">
-                                <span class="fw-bold" th:text="${detail.product.name}"></span>
-                            </div>
-                        </td>
-                        <td class="text-end">[[${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')}]] ₫</td>
-                        <td class="text-center">[[${detail.quantity}]]</td>
-                        <td class="text-end fw-bold text-danger">
-                            [[${#numbers.formatDecimal(detail.price * detail.quantity, 0, 'COMMA', 0, 'POINT')}]] ₫
-                        </td>
-                    </tr>
+                <tbody id="detailTableBody">
+                    <tr><td colspan="5" class="text-center">Đang tải chi tiết sản phẩm...</td></tr>
                 </tbody>
                 <tfoot class="table-light">
                     <tr>
                         <th colspan="4" class="text-end text-uppercase">Tổng thanh toán:</th>
-                        <th class="text-end text-danger fs-5">
-                            [[${#numbers.formatDecimal(#aggregates.sum(order.orderDetails.![price * quantity]), 0, 'COMMA', 0, 'POINT')}]] ₫
-                        </th>
+                        <th class="text-end text-danger fs-5" id="dtTotal">0 ₫</th>
                     </tr>
                 </tfoot>
             </table>
         </div>
     </div>
     <div class="card-footer bg-white text-center py-3">
-        <a th:href="@{/admin/order/index}" class="btn btn-secondary px-4 shadow-sm">
+        <button onclick="showPage('/admin/order/index')" class="btn btn-secondary px-4 shadow-sm">
             <i class="bi bi-arrow-left"></i> QUAY LẠI DANH SÁCH
-        </a>
+        </button>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Lấy ID đơn hàng từ URL (ví dụ: /admin/order/detail/12 -> lấy số 12)
+        const urlParts = window.location.pathname.split('/');
+        const orderId = urlParts[urlParts.length - 1];
+        
+        loadOrderDetail(orderId);
+    });
+
+    function loadOrderDetail(id) {
+        axios.get(`/api/admin/orders/${id}`)
+            .then(res => {
+                const order = res.data;
+                const fmtMoney = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+
+                // 1. Cập nhật Header
+                document.getElementById('detailHeader').innerHTML = `<i class="bi bi-info-circle-fill me-1"></i> CHI TIẾT ĐƠN HÀNG #${order.id}`;
+
+                // 2. Cập nhật Thông tin chung
+                const acc = order.account || {};
+                document.getElementById('dtCustomer').innerText = `${acc.fullname || 'N/A'} (@${acc.username || 'N/A'})`;
+                document.getElementById('dtDate').innerText = order.createDate ? new Date(order.createDate).toLocaleString('vi-VN') : 'N/A';
+                document.getElementById('dtAddress').innerText = order.address || 'N/A';
+                document.getElementById('dtPayment').innerText = order.paymentMethod || 'COD';
+
+                // 3. Đổ danh sách sản phẩm (OrderDetails)
+                const tbody = document.getElementById('detailTableBody');
+                tbody.innerHTML = '';
+                let grandTotal = 0;
+
+                if (!order.orderDetails || order.orderDetails.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Đơn hàng không có sản phẩm nào.</td></tr>';
+                } else {
+                    order.orderDetails.forEach((detail, index) => {
+                        const product = detail.product || {};
+                        const imgTag = product.image ? `<img src="/images/${product.image}" class="rounded border me-2" style="width: 35px; height: 35px; object-fit: cover;">` : '';
+                        const price = detail.price || 0;
+                        const qty = detail.quantity || 0;
+                        const lineTotal = price * qty;
+                        grandTotal += lineTotal;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        ${imgTag}
+                                        <span class="fw-bold">${product.name || 'Sản phẩm không xác định'}</span>
+                                    </div>
+                                </td>
+                                <td class="text-end">${fmtMoney.format(price)}</td>
+                                <td class="text-center">${qty}</td>
+                                <td class="text-end fw-bold text-danger">${fmtMoney.format(lineTotal)}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // 4. Cập nhật Tổng tiền
+                document.getElementById('dtTotal').innerText = fmtMoney.format(grandTotal);
+
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('detailTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Không thể lấy dữ liệu chi tiết đơn hàng này!</td></tr>';
+            });
+    }
+</script>
+</body>
+</html>
