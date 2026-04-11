@@ -84,6 +84,31 @@ public class OrderRestController {
             return ResponseEntity.status(500).body("{\"message\": \"Lỗi xử lý đơn hàng: " + e.getMessage() + "\"}");
         }
     }
+    
+ // 1. API Lấy lịch sử đơn hàng của người dùng đang đăng nhập
+    @GetMapping("/history")
+    public ResponseEntity<?> getMyOrders() {
+        // Lấy user từ session
+        Account user = (Account) session.getAttribute("user");
+        
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập để xem lịch sử!"));
+        }
+
+        // Gọi hàm findByAccount đã có sẵn trong Service
+        List<Order> myOrders = orderService.findByAccount(user);
+        return ResponseEntity.ok(myOrders);
+    }
+
+    // 2. API Xem chi tiết một đơn hàng cụ thể (bao gồm cả các món đã mua)
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrderDetail(@PathVariable("id") Long id) {
+        Order order = orderService.findById(id);
+        if (order == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "Không tìm thấy đơn hàng!"));
+        }
+        return ResponseEntity.ok(order);
+    }
 
     // --- CÁC HÀM QUẢN TRỊ ---
     @GetMapping("/admin/all")
