@@ -1,128 +1,55 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý Tài Khoản</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
-<body>
 <div class="container-fluid mt-4">
-    <div class="card shadow-sm border-0 w-100 mx-auto">
+    <div class="card shadow-sm border-0">
         <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center py-3">
             <span><i class="bi bi-people-fill me-2"></i>QUẢN LÝ TÀI KHOẢN</span>
-            <span class="badge bg-info text-dark" id="accountCount">Đang tải...</span>
+            <span class="badge bg-info text-dark px-3" id="accountCount">Đang tải...</span>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-center small">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light small text-uppercase">
                         <tr>
-                            <th>Username</th>
-                            <th>Họ tên</th>
-                            <th>Email</th>
-                            <th>Vai trò</th>
-                            <th>Cấp quyền</th>
-                            <th>Thao tác</th>
+                            <th>Username</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Cấp quyền</th><th>Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="accountTableBody">
-                        <tr><td colspan="6" class="text-center py-4">Đang tải dữ liệu tài khoản...</td></tr>
-                    </tbody>
+                    <tbody id="accountTableBody"><tr><td colspan="6" class="py-5">Đang tải dữ liệu...</td></tr></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-    const API_ACCOUNTS = '/api/admin/accounts';
-
-    // Gọi API load danh sách ngay khi trang mở
-    document.addEventListener('DOMContentLoaded', () => {
-        loadAccounts();
-    });
-
-    // 1. Hàm tải dữ liệu và vẽ bảng
-    function loadAccounts() {
-        axios.get(API_ACCOUNTS)
-            .then(res => {
-                const accounts = res.data;
-                
-                // Cập nhật số lượng trên header
-                document.getElementById('accountCount').innerText = accounts.length + ' thành viên';
-                
-                const tbody = document.getElementById('accountTableBody');
-                tbody.innerHTML = '';
-
-                if(accounts.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Chưa có tài khoản nào.</td></tr>';
-                    return;
-                }
-
-                // Duyệt qua từng account để tạo HTML
-                accounts.forEach(acc => {
-                    const roleBadge = acc.admin 
-                        ? '<span class="badge bg-danger">Admin</span>' 
-                        : '<span class="badge bg-secondary">User</span>';
-                        
-                    const roleAction = acc.admin
-                        ? `<button class="btn btn-sm btn-link text-decoration-none text-secondary p-0 fw-bold" onclick="updateRole('${acc.username}', false)">
-                             <i class="bi bi-person-dash"></i> Hủy Admin
-                           </button>`
-                        : `<button class="btn btn-sm btn-link text-decoration-none text-danger p-0 fw-bold" onclick="updateRole('${acc.username}', true)">
-                             <i class="bi bi-person-check"></i> Cấp Admin
-                           </button>`;
-
-                    tbody.innerHTML += `
-                        <tr class="text-center">
-                            <td class="fw-bold text-primary">${acc.username}</td>
-                            <td class="text-start fw-bold">${acc.fullname}</td>
-                            <td class="text-start small text-muted">${acc.email}</td>
-                            <td>${roleBadge}</td>
-                            <td>${roleAction}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteAccount('${acc.username}')" title="Xóa tài khoản">
-                                    <i class="bi bi-trash3-fill"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            })
-            .catch(err => {
-                document.getElementById('accountTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu tài khoản!</td></tr>';
-                console.error(err);
+    var API_ACCOUNTS = '/api/admin/accounts';
+    async function loadAccounts() {
+        const tbody = document.getElementById('accountTableBody');
+        if(!tbody) return;
+        try {
+            const res = await axios.get(API_ACCOUNTS);
+            document.getElementById('accountCount').innerText = res.data.length + ' TV';
+            let html = '';
+            res.data.forEach(acc => {
+                const isAdmin = acc.admin === true;
+                html += `<tr>
+                    <td class="fw-bold text-primary">${acc.username}</td>
+                    <td class="text-start fw-bold">${acc.fullname}</td>
+                    <td class="text-start small">${acc.email}</td>
+                    <td><span class="badge ${isAdmin ? 'bg-danger' : 'bg-secondary'}">${isAdmin ? 'Admin' : 'User'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-link text-decoration-none fw-bold ${isAdmin ? 'text-secondary' : 'text-danger'}" onclick="updateRole('${acc.username}', ${!isAdmin})">
+                            <i class="bi ${isAdmin ? 'bi-person-dash' : 'bi-person-check'}"></i> ${isAdmin ? 'Hủy' : 'Cấp'} Admin
+                        </button>
+                    </td>
+                    <td><button class="btn btn-sm btn-outline-danger border-0" onclick="deleteAccount('${acc.username}')"><i class="bi bi-trash3"></i></button></td>
+                </tr>`;
             });
+            tbody.innerHTML = html;
+        } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="text-danger">Lỗi nạp dữ liệu</td></tr>'; }
     }
-
-    // 2. Hàm Cấp/Hủy quyền Admin
-    function updateRole(username, makeAdmin) {
-        const actionText = makeAdmin ? 'CẤP quyền Admin' : 'HỦY quyền Admin';
-        if(confirm(`Bạn có chắc chắn muốn ${actionText} cho tài khoản [${username}]?`)) {
-            axios.put(`${API_ACCOUNTS}/${username}/role`, { admin: makeAdmin })
-                .then(res => {
-                    // Cập nhật thành công -> Load lại bảng ngay lập tức
-                    loadAccounts(); 
-                })
-                .catch(err => alert('Lỗi: Không thể cập nhật quyền!'));
-        }
+    async function updateRole(u, r) {
+        if(confirm('Bạn có chắc?')) { await axios.put(`${API_ACCOUNTS}/${u}/role`, {admin: r}); loadAccounts(); }
     }
-
-    // 3. Hàm Xóa tài khoản
-    function deleteAccount(username) {
-        if(confirm(`CẢNH BÁO: Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản [${username}]?`)) {
-            axios.delete(`${API_ACCOUNTS}/${username}`)
-                .then(res => {
-                    alert('Đã xóa tài khoản thành công!');
-                    loadAccounts(); // Load lại bảng
-                })
-                .catch(err => {
-                    alert('Lỗi: Không thể xóa! Tài khoản này có thể đã từng mua hàng nên bị ràng buộc dữ liệu.');
-                });
-        }
+    async function deleteAccount(u) {
+        if(confirm('Xóa vĩnh viễn?')) { await axios.delete(`${API_ACCOUNTS}/${u}`); loadAccounts(); }
     }
+    loadAccounts();
 </script>
-</body>
-</html>
